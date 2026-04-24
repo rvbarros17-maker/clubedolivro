@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1C1A16">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Clube Leitura">
+<title>Clube Leitura</title>
+<link rel="manifest" href="#" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --cream: #F5F0E8;
+  --paper: #EDE7D9;
+  --paper2: #E5DDD0;
+  --ink: #1C1A16;
+  --ink-light: #4A4640;
+  --ink-faint: rgba(28,26,22,0.35);
+  --amber: #C8852A;
+  --amber-light: #E8A84A;
+  --amber-bg: rgba(200,133,42,0.12);
+  --burgundy: #7A2E3C;
+  --sage: #5C7A5E;
+  --white: #FFFFFF;
+  --shadow-sm: 0 2px 8px rgba(28,26,22,0.08);
+  --shadow-md: 0 4px 20px rgba(28,26,22,0.12);
+  --shadow-lg: 0 8px 40px rgba(28,26,22,0.18);
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--ink);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── LOADING ─── */
+#loading-screen {
+  position: fixed; inset: 0;
+  background: var(--ink);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.4s;
+}
+#loading-screen .logo-load {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px; color: var(--amber-light);
+  margin-bottom: 8px;
+}
+#loading-screen .logo-load span { font-style: italic; color: white; }
+#loading-screen .spinner {
+  width: 32px; height: 32px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-top-color: var(--amber);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-top: 24px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#setup-screen {
+  position: fixed; inset: 0;
+  background: var(--ink);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 28px;
+  z-index: 100;
+}
+
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--cream);
+  position: relative;
+  display: flex; flex-direction: column;
+}
+
+/* ─── LOGIN ─── */
+#login-screen {
+  position: fixed; inset: 0;
+  background: var(--ink);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 28px;
+  z-index: 100;
+}
+.login-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 38px; color: var(--amber-light);
+  margin-bottom: 4px; text-align: center;
+}
+.login-logo span { font-style: italic; color: white; }
+.login-tagline {
+  font-size: 13px; color: rgba(255,255,255,0.35);
+  margin-bottom: 48px; text-align: center;
+  letter-spacing: 0.5px;
+}
+.login-card {
+  width: 100%; max-width: 360px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 28px;
+}
+.login-card h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; color: white;
+  margin-bottom: 24px;
+}
+.login-input {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 13px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; color: white;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.login-input::placeholder { color: rgba(255,255,255,0.25); }
+.login-input:focus { outline: none; border-color: var(--amber); }
+.login-error {
+  font-size: 12px; color: #E57373;
+  margin-bottom: 12px; display: none;
+}
+
+/* ─── HEADER ─── */
+.app-header {
+  background: var(--ink);
+  padding: 48px 20px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.header-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; color: var(--amber-light);
+}
+.header-logo span { font-style: italic; color: white; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.admin-pill {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase;
+  background: var(--amber-bg);
+  color: var(--amber-light);
+  border: 1px solid rgba(200,133,42,0.3);
+  padding: 3px 10px; border-radius: 20px;
+}
+.header-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; color: white;
+  flex-shrink: 0; cursor: pointer;
+}
+
+/* ─── CONTENT ─── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 80px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── BOTTOM NAV ─── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  background: var(--ink);
+  padding: 10px 0 24px;
+  display: flex; justify-content: space-around;
+  z-index: 50;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.nav-btn {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 3px;
+  background: none; border: none;
+  cursor: pointer; padding: 4px 12px;
+  color: rgba(255,255,255,0.3);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px; letter-spacing: 0.3px;
+  transition: color 0.2s;
+}
+.nav-btn.active { color: var(--amber-light); }
+.nav-btn .nav-icon { font-size: 22px; }
+
+/* ─── SCREENS ─── */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ─── HOME ─── */
+.hero-section {
+  background: var(--ink);
+  padding: 0 20px 24px;
+}
+.month-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--amber-bg);
+  border: 1px solid rgba(200,133,42,0.3);
+  border-radius: 20px; padding: 4px 12px;
+  font-size: 11px; color: var(--amber-light);
+  letter-spacing: 1px; text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.book-hero {
+  display: flex; gap: 16px; align-items: flex-start;
+}
+.book-cover {
+  border-radius: 6px;
+  box-shadow: 6px 6px 24px rgba(0,0,0,0.5);
+  flex-shrink: 0; object-fit: cover;
+  background: linear-gradient(135deg, var(--burgundy), #2A0F17);
+}
+.book-cover-placeholder {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+}
+.book-hero .book-cover { width: 90px; height: 130px; }
+.book-hero-info { flex: 1; padding-top: 2px; }
+.book-hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px; color: white; line-height: 1.2;
+  margin-bottom: 4px;
+}
+.book-hero-author { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 6px; }
+.book-hero-genre {
+  display: inline-block;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.5px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.5);
+  padding: 2px 8px; border-radius: 10px;
+  margin-bottom: 10px;
+}
+.chosen-by { font-size: 11px; color: rgba(255,255,255,0.3); margin-bottom: 10px; }
+.chosen-by strong { color: var(--amber-light); }
+.stars-display { display: flex; align-items: center; gap: 2px; margin-bottom: 14px; }
+.star-f { color: var(--amber); font-size: 14px; }
+.star-e { color: rgba(255,255,255,0.15); font-size: 14px; }
+.stars-avg { font-size: 11px; color: rgba(255,255,255,0.35); margin-left: 6px; }
+.no-book-msg {
+  text-align: center; padding: 40px 20px;
+  color: rgba(255,255,255,0.4);
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 16px;
+}
+
+/* Discussions */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 20px 12px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px; color: var(--ink);
+}
+.topic-card {
+  margin: 0 16px 10px;
+  background: white;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.topic-card:active { box-shadow: var(--shadow-md); }
+.topic-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: white; flex-shrink: 0;
+}
+.topic-author-name { font-size: 12px; font-weight: 500; color: var(--ink-light); }
+.topic-time { font-size: 11px; color: var(--ink-faint); margin-left: auto; }
+.topic-text { font-size: 13px; color: var(--ink); line-height: 1.5; }
+.topic-replies { font-size: 11px; color: var(--amber); margin-top: 6px; font-weight: 500; }
+
+.empty-state {
+  text-align: center; padding: 32px 20px;
+  color: var(--ink-faint);
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 15px;
+}
+
+/* ─── ACERVO ─── */
+.acervo-grid { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.acervo-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex; gap: 14px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.acervo-cover { width: 60px; height: 88px; border-radius: 4px; flex-shrink: 0; object-fit: cover; }
+.acervo-cover-ph {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  background: linear-gradient(135deg, var(--burgundy), #2A0F17);
+}
+.acervo-info { flex: 1; }
+.acervo-month { font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.acervo-title { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--ink); margin-bottom: 2px; line-height: 1.2; }
+.acervo-author { font-size: 12px; color: var(--ink-faint); margin-bottom: 6px; }
+.acervo-genre-tag {
+  display: inline-block; font-size: 10px; font-weight: 500;
+  background: var(--paper); color: var(--ink-light);
+  padding: 2px 8px; border-radius: 10px; margin-bottom: 6px;
+}
+.acervo-stars { display: flex; align-items: center; gap: 2px; }
+.acervo-star-f { color: var(--amber); font-size: 12px; }
+.acervo-star-e { color: rgba(28,26,22,0.15); font-size: 12px; }
+.acervo-avg { font-size: 11px; color: var(--ink-faint); margin-left: 4px; }
+
+/* ─── DISCUSSAO ─── */
+.disc-header {
+  background: var(--ink); padding: 0 20px 20px;
+}
+.disc-book-mini {
+  display: flex; gap: 12px; align-items: center;
+}
+.disc-cover { width: 44px; height: 64px; border-radius: 4px; flex-shrink: 0; object-fit: cover; }
+.disc-cover-ph {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  background: linear-gradient(135deg, var(--burgundy), #2A0F17);
+}
+.disc-title { font-family: 'Playfair Display', serif; font-size: 15px; color: white; margin-bottom: 2px; }
+.disc-author { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+.topics-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+.full-topic-card {
+  background: white; border-radius: var(--radius);
+  padding: 14px 16px; box-shadow: var(--shadow-sm);
+}
+.reply-area { padding: 0 16px 16px; }
+.reply-box {
+  display: flex; gap: 8px; align-items: flex-end;
+}
+.reply-input {
+  flex: 1; background: white;
+  border: 1.5px solid rgba(28,26,22,0.12);
+  border-radius: 10px; padding: 10px 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: var(--ink); resize: none;
+  max-height: 100px;
+}
+.reply-input:focus { outline: none; border-color: var(--amber); }
+.reply-input::placeholder { color: var(--ink-faint); }
+
+/* ─── AVALIAR ─── */
+.form-section { padding: 20px; }
+.form-group { margin-bottom: 20px; }
+.form-label {
+  display: block; font-size: 11px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--ink-light); margin-bottom: 8px;
+}
+.stars-picker { display: flex; gap: 6px; }
+.star-pick {
+  font-size: 30px; cursor: pointer;
+  color: rgba(28,26,22,0.15);
+  transition: color 0.1s, transform 0.1s;
+  user-select: none;
+}
+.star-pick.on { color: var(--amber); }
+.star-pick:active { transform: scale(1.2); }
+.form-input {
+  width: 100%; background: white;
+  border: 1.5px solid rgba(28,26,22,0.1);
+  border-radius: 10px; padding: 12px 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: var(--ink); resize: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus { outline: none; border-color: var(--amber); }
+.form-input::placeholder { color: var(--ink-faint); }
+.form-select {
+  width: 100%; background: white;
+  border: 1.5px solid rgba(28,26,22,0.1);
+  border-radius: 10px; padding: 12px 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: var(--ink); appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234A4640' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  cursor: pointer;
+}
+.form-select:focus { outline: none; border-color: var(--amber); }
+
+.char-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.char-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--paper); border: 1px solid rgba(28,26,22,0.1);
+  border-radius: 20px; padding: 4px 10px;
+  font-size: 12px; color: var(--ink-light);
+}
+.char-tag-x {
+  cursor: pointer; color: var(--ink-faint);
+  font-size: 14px; line-height: 1;
+  transition: color 0.2s;
+}
+.char-tag-x:hover { color: var(--burgundy); }
+.char-input-row { display: flex; gap: 8px; }
+.char-input-row input {
+  flex: 1; background: white;
+  border: 1.5px solid rgba(28,26,22,0.1);
+  border-radius: 8px; padding: 9px 12px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink);
+}
+.char-input-row input:focus { outline: none; border-color: var(--amber); }
+
+/* ─── ADMIN ─── */
+.admin-tabs {
+  display: flex; background: var(--ink);
+  padding: 0 20px 16px; gap: 8px;
+}
+.admin-tab {
+  flex: 1; padding: 8px 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; color: rgba(255,255,255,0.4);
+  cursor: pointer; text-align: center;
+  transition: all 0.2s;
+}
+.admin-tab.active {
+  background: var(--amber); border-color: var(--amber);
+  color: white; font-weight: 500;
+}
+.admin-panel { display: none; padding: 16px 20px; }
+.admin-panel.active { display: block; }
+.admin-card {
+  background: white; border-radius: var(--radius);
+  padding: 16px; margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.admin-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; color: var(--ink); margin-bottom: 14px;
+}
+
+.upload-area {
+  border: 2px dashed rgba(28,26,22,0.15);
+  border-radius: 10px; padding: 20px;
+  text-align: center; background: var(--paper);
+  cursor: pointer; margin-bottom: 10px;
+  transition: border-color 0.2s;
+}
+.upload-area:hover { border-color: var(--amber); }
+.upload-area p { font-size: 12px; color: var(--ink-faint); margin-top: 4px; }
+.upload-area strong { font-size: 13px; color: var(--amber); }
+.upload-preview {
+  width: 80px; height: 116px;
+  border-radius: 6px; object-fit: cover;
+  margin: 0 auto 8px; display: block;
+}
+
+.sorteio-box {
+  background: var(--ink); border-radius: var(--radius);
+  padding: 20px; text-align: center; margin-bottom: 14px;
+}
+.sorteio-label { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+.sorteio-result {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; color: var(--amber-light);
+  min-height: 36px; margin-bottom: 14px;
+  transition: all 0.3s;
+}
+.fila-wrap { margin-bottom: 14px; }
+.fila-label { font-size: 11px; color: var(--ink-faint); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; }
+.fila-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.fila-chip {
+  background: var(--paper); border-radius: 20px;
+  padding: 4px 10px; font-size: 12px; color: var(--ink-light);
+  display: flex; align-items: center; gap: 5px;
+}
+.fila-chip.done { opacity: 0.35; text-decoration: line-through; }
+.fila-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); }
+.fila-chip.done .fila-dot { background: rgba(28,26,22,0.2); }
+
+.genre-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.genre-chip {
+  background: var(--paper); border: 1.5px solid rgba(28,26,22,0.08);
+  border-radius: 8px; padding: 10px 8px;
+  text-align: center; font-size: 12px; color: var(--ink-light);
+  transition: all 0.3s;
+}
+.genre-chip.picked {
+  border-color: var(--amber);
+  background: var(--amber-bg); color: var(--amber);
+  font-weight: 600;
+  animation: pop 0.3s ease;
+}
+@keyframes pop { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+
+.member-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 0; border-bottom: 1px solid rgba(28,26,22,0.06);
+}
+.member-row:last-child { border-bottom: none; }
+.member-info { flex: 1; }
+.member-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+.member-email { font-size: 11px; color: var(--ink-faint); }
+.member-role {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.5px;
+  padding: 2px 8px; border-radius: 10px;
+  background: var(--paper); color: var(--ink-light);
+}
+.member-role.admin { background: var(--amber-bg); color: var(--amber); }
+.member-del {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: none; border: 1.5px solid rgba(122,46,60,0.3);
+  color: var(--burgundy); cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.member-del:hover { background: var(--burgundy); color: white; }
+
+/* ─── BOOK DETAIL ─── */
+.book-detail-header {
+  background: var(--ink); padding: 0 20px 24px;
+}
+.book-detail-cover {
+  width: 100px; height: 145px;
+  border-radius: 8px; object-fit: cover;
+  box-shadow: 8px 8px 32px rgba(0,0,0,0.5);
+  margin-bottom: 16px;
+}
+.book-detail-cover-ph {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+  background: linear-gradient(135deg, var(--burgundy), #2A0F17);
+}
+.book-detail-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; color: white; line-height: 1.2; margin-bottom: 4px;
+}
+.book-detail-author { font-size: 14px; color: rgba(255,255,255,0.45); margin-bottom: 8px; }
+.book-detail-genre {
+  display: inline-block; font-size: 11px; font-weight: 500;
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5);
+  padding: 3px 10px; border-radius: 10px; margin-bottom: 8px;
+}
+.book-detail-meta { font-size: 12px; color: rgba(255,255,255,0.3); }
+.book-detail-meta strong { color: var(--amber-light); }
+
+.review-card {
+  background: white; border-radius: var(--radius);
+  padding: 14px 16px; margin: 0 16px 10px;
+  box-shadow: var(--shadow-sm);
+}
+.review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.review-user { flex: 1; }
+.review-user-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+.review-stars { display: flex; gap: 2px; }
+.review-star-f { color: var(--amber); font-size: 13px; }
+.review-star-e { color: rgba(28,26,22,0.15); font-size: 13px; }
+.review-field { margin-bottom: 8px; }
+.review-field-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 3px;
+}
+.review-field-val { font-size: 13px; color: var(--ink); line-height: 1.5; }
+.char-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.char-pill {
+  background: var(--paper); border-radius: 20px;
+  padding: 2px 8px; font-size: 11px; color: var(--ink-light);
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; border: none; border-radius: 10px;
+  padding: 12px 18px; font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  width: 100%; transition: opacity 0.2s, transform 0.1s;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--amber); color: white; }
+.btn-secondary { background: transparent; border: 1.5px solid var(--ink); color: var(--ink); }
+.btn-dark { background: var(--ink); color: white; }
+.btn-danger { background: var(--burgundy); color: white; }
+.btn-sm { padding: 8px 14px; font-size: 13px; border-radius: 8px; width: auto; }
+.btn:disabled { opacity: 0.5; pointer-events: none; }
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed; bottom: 90px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: white;
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 500;
+  opacity: 0; transition: all 0.3s;
+  z-index: 200; white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 150; display: none;
+  align-items: flex-end; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--cream);
+  border-radius: 20px 20px 0 0;
+  padding: 20px; width: 100%; max-width: 480px;
+  max-height: 90vh; overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from{transform:translateY(60px);opacity:0} to{transform:translateY(0);opacity:1} }
+.modal-handle {
+  width: 36px; height: 4px;
+  background: rgba(28,26,22,0.15);
+  border-radius: 2px; margin: 0 auto 16px;
+}
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; color: var(--ink); margin-bottom: 16px;
+}
+
+/* ─── UTILITIES ─── */
+.hidden { display: none !important; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.gap-8 { gap: 8px; }
+.text-center { text-align: center; }
+
+.page-top {
+  padding: 16px 20px 0;
+}
+.page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; color: var(--ink);
+}
+.page-subtitle { font-size: 13px; color: var(--ink-faint); margin-top: 2px; }
+
+.avatar-colors { }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="logo-load">Clube<span>Leitura</span></div>
+  <div class="spinner"></div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen" class="hidden">
+  <div class="login-logo">Clube<span>Leitura</span></div>
+  <div class="login-tagline">O app do seu clube do livro</div>
+  <div class="login-card">
+    <h2>Entrar</h2>
+    <input id="login-username" class="login-input" type="text" placeholder="usuário (ex: rafaelbarros)" autocomplete="username" autocapitalize="none">
+    <input id="login-password" class="login-input" type="password" placeholder="Senha" autocomplete="current-password">
+    <div id="login-error" class="login-error"></div>
+    <button class="btn btn-primary mt-8" onclick="doLogin()">Entrar no clube</button>
+  </div>
+</div>
+
+<!-- SETUP (primeiro acesso) -->
+<div id="setup-screen" class="hidden">
+  <div class="login-logo">Clube<span>Leitura</span></div>
+  <div class="login-tagline">Primeiro acesso — configure o administrador</div>
+  <div class="login-card">
+    <h2>Criar ADM</h2>
+    <input id="setup-name" class="login-input" type="text" placeholder="Seu nome (ex: Rafael Barros)">
+    <input id="setup-username" class="login-input" type="text" placeholder="Usuário (ex: rafaelbarros)" autocapitalize="none">
+    <input id="setup-pass" class="login-input" type="password" placeholder="Senha">
+    <div id="setup-error" class="login-error"></div>
+    <button class="btn btn-primary mt-8" onclick="doSetup()">Criar administrador</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <div class="app-header">
+    <div class="header-logo">Clube<span>Leitura</span></div>
+    <div class="header-right">
+      <div id="admin-pill" class="admin-pill hidden">ADM</div>
+      <div id="header-avatar" class="header-avatar" onclick="confirmLogout()"></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- HOME -->
+    <div id="screen-home" class="screen active">
+      <div class="hero-section" id="home-hero">
+        <div class="no-book-msg">Nenhum livro registrado este mês.</div>
+      </div>
+      <div class="section-header">
+        <div class="section-title">💬 Discussões</div>
+        <button class="btn btn-primary btn-sm" onclick="openNewTopicModal()">+ Tópico</button>
+      </div>
+      <div id="topics-list"></div>
+    </div>
+
+    <!-- ACERVO -->
+    <div id="screen-acervo" class="screen">
+      <div class="page-top">
+        <div class="page-title">Acervo</div>
+        <div class="page-subtitle">Todos os livros do clube</div>
+      </div>
+      <div id="acervo-list" class="acervo-grid"></div>
+    </div>
+
+    <!-- DISCUSSÃO (tópico aberto) -->
+    <div id="screen-disc" class="screen">
+      <div class="disc-header" id="disc-header"></div>
+      <div id="disc-topics" class="topics-list"></div>
+      <div class="reply-area" id="disc-reply-area" style="display:none">
+        <div style="font-size:12px;color:var(--ink-faint);margin-bottom:6px;" id="reply-context"></div>
+        <div class="reply-box">
+          <textarea class="reply-input" id="reply-input" rows="2" placeholder="Escreva um tópico ou resposta…"></textarea>
+          <button class="btn btn-primary btn-sm" onclick="postTopic()">Enviar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AVALIAR -->
+    <div id="screen-avaliar" class="screen">
+      <div class="hero-section" id="avaliar-hero"></div>
+      <div class="form-section">
+        <div id="already-reviewed-msg" class="hidden">
+          <div class="empty-state">✅ Você já avaliou este livro!</div>
+          <button class="btn btn-secondary mt-12" onclick="editReview()">✏️ Editar avaliação</button>
+        </div>
+        <div id="review-form">
+          <div class="form-group">
+            <label class="form-label">Sua nota ⭐</label>
+            <div class="stars-picker" id="stars-picker">
+              <span class="star-pick" data-v="1" onclick="pickStar(1)">★</span>
+              <span class="star-pick" data-v="2" onclick="pickStar(2)">★</span>
+              <span class="star-pick" data-v="3" onclick="pickStar(3)">★</span>
+              <span class="star-pick" data-v="4" onclick="pickStar(4)">★</span>
+              <span class="star-pick" data-v="5" onclick="pickStar(5)">★</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Personagens principais</label>
+            <div class="char-tags" id="char-tags"></div>
+            <div class="char-input-row">
+              <input type="text" id="char-input" placeholder="Nome do personagem…" onkeydown="charKeydown(event)">
+              <button class="btn btn-dark btn-sm" onclick="addChar()">+</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Trecho favorito</label>
+            <textarea class="form-input" id="trecho-input" rows="3" placeholder="Cole ou escreva o trecho que mais te marcou…"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Comentário</label>
+            <textarea class="form-input" id="comment-input" rows="3" placeholder="O que você achou do livro?"></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="submitReview()">✅ Enviar avaliação</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="screen-admin" class="screen">
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchAdminTab('livro')">📖 Livro</button>
+        <button class="admin-tab" onclick="switchAdminTab('sorteio')">🎲 Sorteio</button>
+        <button class="admin-tab" onclick="switchAdminTab('membros')">👥 Membros</button>
+      </div>
+
+      <!-- TAB LIVRO -->
+      <div id="admin-livro" class="admin-panel active">
+        <div class="admin-card">
+          <div class="admin-card-title">📖 Registrar livro do mês</div>
+          <input class="form-input" id="book-titulo" placeholder="Título do livro" style="margin-bottom:10px">
+          <input class="form-input" id="book-autor" placeholder="Autor" style="margin-bottom:10px">
+          <select class="form-select" id="book-genero" style="margin-bottom:10px">
+            <option value="">Selecione o gênero…</option>
+            <option>🌹 Romance</option>
+            <option>🧙 Fantasia</option>
+            <option>🔍 Suspense</option>
+            <option>🕵️ Policial</option>
+            <option>🚀 Ficção Científica</option>
+            <option>💡 Autoajuda</option>
+            <option>📜 Biografia</option>
+            <option>😂💕 Comédia Romântica</option>
+            <option>😂 Comédia</option>
+            <option>🇧🇷 Literatura Brasileira</option>
+          </select>
+          <input class="form-input" id="book-escolhido" placeholder="Escolhido por…" style="margin-bottom:10px">
+          <div class="upload-area" onclick="document.getElementById('cover-upload').click()">
+            <img id="cover-preview" class="upload-preview hidden">
+            <div id="upload-placeholder">
+              <div style="font-size:28px">🖼️</div>
+              <p><strong>Toque para enviar a capa</strong></p>
+              <p>JPG, PNG até 5MB</p>
+            </div>
+          </div>
+          <input type="file" id="cover-upload" accept="image/*" class="hidden" onchange="previewCover(event)">
+          <button class="btn btn-primary" onclick="registerBook()">➕ Registrar livro</button>
+        </div>
+      </div>
+
+      <!-- TAB SORTEIO -->
+      <div id="admin-sorteio" class="admin-panel">
+        <div class="admin-card">
+          <div class="admin-card-title">🎲 Sortear próximo escolhedor</div>
+          <div class="sorteio-box">
+            <div class="sorteio-label">Próximo a escolher o livro</div>
+            <div class="sorteio-result" id="sorteio-membro-result">—</div>
+            <button class="btn btn-primary btn-sm" onclick="sortearMembro()">🎲 Sortear</button>
+          </div>
+          <div class="fila-wrap">
+            <div class="fila-label">Fila atual</div>
+            <div class="fila-chips" id="fila-chips"></div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="resetFila()" style="width:auto">↺ Reiniciar fila</button>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-title">📚 Sortear gênero</div>
+          <div class="genre-grid" id="genre-grid">
+            <div class="genre-chip">🌹 Romance</div>
+            <div class="genre-chip">🧙 Fantasia</div>
+            <div class="genre-chip">🔍 Suspense</div>
+            <div class="genre-chip">🕵️ Policial</div>
+            <div class="genre-chip">🚀 Ficção Científica</div>
+            <div class="genre-chip">💡 Autoajuda</div>
+            <div class="genre-chip">📜 Biografia</div>
+            <div class="genre-chip">😂💕 Comédia Romântica</div>
+            <div class="genre-chip">😂 Comédia</div>
+            <div class="genre-chip">🇧🇷 Literatura Brasileira</div>
+          </div>
+          <button class="btn btn-dark" onclick="sortearGenero()">🎲 Sortear gênero</button>
+        </div>
+      </div>
+
+      <!-- TAB MEMBROS -->
+      <div id="admin-membros" class="admin-panel">
+        <div class="admin-card">
+          <div class="admin-card-title">➕ Adicionar membro</div>
+          <input class="form-input" id="new-member-name" placeholder="Nome completo" style="margin-bottom:10px">
+          <input class="form-input" id="new-member-username" placeholder="Usuário (ex: mariaalves)" autocapitalize="none" style="margin-bottom:10px">
+          <input class="form-input" id="new-member-pass" placeholder="Senha inicial" type="password" style="margin-bottom:10px">
+          <button class="btn btn-primary" onclick="createMember()">➕ Criar membro</button>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">👥 Membros do clube</div>
+          <div id="members-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETALHE DO LIVRO -->
+    <div id="screen-book-detail" class="screen">
+      <div class="book-detail-header" id="detail-header"></div>
+      <div id="detail-reviews"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="goTo('home')" id="nav-home">
+      <span class="nav-icon">📖</span>
+      <span>Início</span>
+    </button>
+    <button class="nav-btn" onclick="goTo('acervo')" id="nav-acervo">
+      <span class="nav-icon">📚</span>
+      <span>Acervo</span>
+    </button>
+    <button class="nav-btn" onclick="goTo('disc')" id="nav-disc">
+      <span class="nav-icon">💬</span>
+      <span>Discussão</span>
+    </button>
+    <button class="nav-btn" onclick="goTo('avaliar')" id="nav-avaliar">
+      <span class="nav-icon">⭐</span>
+      <span>Avaliar</span>
+    </button>
+    <button class="nav-btn hidden" onclick="goTo('admin')" id="nav-admin">
+      <span class="nav-icon">⚙️</span>
+      <span>Admin</span>
+    </button>
+  </div>
+</div>
+
+<!-- MODAL: Novo Tópico -->
+<div class="modal-overlay" id="modal-topic" onclick="closeModal('modal-topic')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💬 Novo tópico de discussão</div>
+    <textarea class="form-input" id="new-topic-text" rows="4" placeholder="Escreva um assunto, pergunta ou reflexão sobre o livro do mês…"></textarea>
+    <button class="btn btn-primary mt-12" onclick="submitTopic()">Publicar tópico</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
+  collection, query, where, orderBy, onSnapshot, serverTimestamp, Timestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+// ════════════════════════════════════════
+// 🔥 FIREBASE CONFIG
+// ════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyCMdW9OiJ3NhdepnznfV4F1hpBoByu9_Zs",
+  authDomain: "clube-do-livro-b1995.firebaseapp.com",
+  projectId: "clube-do-livro-b1995",
+  storageBucket: "clube-do-livro-b1995.firebasestorage.app",
+  messagingSenderId: "563155965273",
+  appId: "1:563155965273:web:056a2f93dd65f3fb40a848"
+};
+// ════════════════════════════════════════
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+// ─── STATE ───
+let currentUser = null;
+let currentUserData = null;
+let currentBook = null;
+let currentReview = null;
+let reviewStars = 0;
+let reviewChars = [];
+let pendingCoverFile = null;
+let filaState = [];
+let unsubTopics = null;
+
+// ─── AVATAR COLORS ───
+const avatarColors = ['#7A2E3C','#5C7A5E','#C8852A','#4A6B8A','#6B4A8A','#8A6B4A','#3C6B7A','#7A6B3C'];
+function getAvatarColor(name) {
+  let h = 0; for (let c of (name||'')) h = (h * 31 + c.charCodeAt(0)) & 0xFFFF;
+  return avatarColors[h % avatarColors.length];
+}
+function initials(name) {
+  return (name||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+function makeAvatar(name, size=28) {
+  return `<div class="avatar" style="background:${getAvatarColor(name)};width:${size}px;height:${size}px;font-size:${Math.round(size*0.38)}px">${initials(name)}</div>`;
+}
+
+// ─── AUTH STATE ───
+onAuthStateChanged(auth, async user => {
+  document.getElementById('loading-screen').style.opacity = '0';
+  setTimeout(() => document.getElementById('loading-screen').classList.add('hidden'), 400);
+
+  if (user) {
+    currentUser = user;
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    currentUserData = snap.exists() ? snap.data() : { name: user.email, role: 'member' };
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('setup-screen').classList.add('hidden');
+    startApp();
+  } else {
+    // Checar se já existe ADM — se não, mostrar setup
+    const admSnap = await getDocs(query(collection(db,'users'), where('role','==','admin')));
+    if (admSnap.empty) {
+      document.getElementById('setup-screen').classList.remove('hidden');
+    } else {
+      document.getElementById('login-screen').classList.remove('hidden');
+    }
+    document.getElementById('app').classList.add('hidden');
+  }
+});
+
+// ─── SETUP (criar primeiro ADM) ───
+window.doSetup = async function() {
+  const name = document.getElementById('setup-name').value.trim();
+  const username = document.getElementById('setup-username').value.trim().toLowerCase().replace(/\s+/g,'');
+  const pass = document.getElementById('setup-pass').value;
+  const errEl = document.getElementById('setup-error');
+  errEl.style.display = 'none';
+  if (!name || !username || !pass) { errEl.textContent = 'Preencha todos os campos.'; errEl.style.display='block'; return; }
+  if (pass.length < 6) { errEl.textContent = 'Senha mínima de 6 caracteres.'; errEl.style.display='block'; return; }
+
+  // username como email interno: username@clubeleitura.app
+  const fakeEmail = `${username}@clubeleitura.app`;
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
+    await setDoc(doc(db,'users', cred.user.uid), { name, username, email: fakeEmail, role: 'admin' });
+    await setDoc(doc(db,'usernames', username), { uid: cred.user.uid });
+  } catch(e) {
+    errEl.textContent = 'Erro ao criar: ' + e.message;
+    errEl.style.display = 'block';
+  }
+};
+
+// ─── LOGIN por username ───
+window.doLogin = async function() {
+  const username = document.getElementById('login-username').value.trim().toLowerCase().replace(/\s+/g,'');
+  const pass = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  if (!username || !pass) { errEl.textContent = 'Preencha usuário e senha.'; errEl.style.display='block'; return; }
+
+  try {
+    // Buscar email pelo username
+    const unSnap = await getDoc(doc(db,'usernames', username));
+    if (!unSnap.exists()) { errEl.textContent = 'Usuário não encontrado.'; errEl.style.display='block'; return; }
+    const fakeEmail = `${username}@clubeleitura.app`;
+    await signInWithEmailAndPassword(auth, fakeEmail, pass);
+  } catch(e) {
+    errEl.textContent = 'Usuário ou senha incorretos.';
+    errEl.style.display = 'block';
+  }
+};
+
+// ─── START APP ───
+function startApp() {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+
+  const name = currentUserData.name || currentUser.email;
+  const av = document.getElementById('header-avatar');
+  av.textContent = initials(name);
+  av.style.background = getAvatarColor(name);
+
+  const isAdmin = currentUserData.role === 'admin';
+  if (isAdmin) {
+    document.getElementById('admin-pill').classList.remove('hidden');
+    document.getElementById('nav-admin').classList.remove('hidden');
+  }
+
+  loadHome();
+  loadFila();
+}
+
+// ──────────────────────────────────────
+// HOME
+// ──────────────────────────────────────
+async function loadHome() {
+  await loadCurrentBook();
+  loadTopics();
+}
+
+async function loadCurrentBook() {
+  const now = new Date();
+  const monthId = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const snap = await getDoc(doc(db, 'books', monthId));
+  currentBook = snap.exists() ? { id: monthId, ...snap.data() } : null;
+  renderHero();
+}
+
+function renderHero(target='home') {
+  const el = document.getElementById(target === 'home' ? 'home-hero' : 'avaliar-hero');
+  if (!currentBook) {
+    el.innerHTML = `<div class="no-book-msg">Nenhum livro registrado este mês.</div>`;
+    return;
+  }
+  const b = currentBook;
+  const coverHtml = b.coverUrl
+    ? `<img src="${b.coverUrl}" class="book-cover" style="width:90px;height:130px">`
+    : `<div class="book-cover book-cover-placeholder" style="width:90px;height:130px">📖</div>`;
+  const avg = b.avgStars ? b.avgStars.toFixed(1) : '—';
+  const count = b.reviewCount || 0;
+  const starsHtml = [1,2,3,4,5].map(i=>
+    `<span class="${i <= Math.round(b.avgStars||0) ? 'star-f' : 'star-e'}">★</span>`
+  ).join('');
+
+  el.innerHTML = `
+    <div class="month-badge">📅 ${monthLabel()}</div>
+    <div class="book-hero">
+      ${coverHtml}
+      <div class="book-hero-info">
+        <div class="book-hero-title">${b.titulo}</div>
+        <div class="book-hero-author">${b.autor}</div>
+        <div class="book-hero-genre">${b.genero||''}</div>
+        <div class="chosen-by">Escolhido por <strong>${b.escolhidoPor||'—'}</strong></div>
+        <div class="stars-display">${starsHtml}<span class="stars-avg">${avg} · ${count} avaliações</span></div>
+        ${target==='home' ? `<button class="btn btn-primary" onclick="goTo('avaliar')">✍️ Avaliar</button>` : ''}
+      </div>
+    </div>`;
+}
+
+function monthLabel() {
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+    'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const d = new Date();
+  return `${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+// ─── TOPICS ───
+function loadTopics() {
+  if (unsubTopics) unsubTopics();
+  if (!currentBook) {
+    document.getElementById('topics-list').innerHTML = `<div class="empty-state">Registre o livro do mês para abrir as discussões.</div>`;
+    return;
+  }
+  const q = query(collection(db,'topics'), where('bookId','==',currentBook.id), orderBy('createdAt','desc'));
+  unsubTopics = onSnapshot(q, snap => {
+    const el = document.getElementById('topics-list');
+    if (snap.empty) {
+      el.innerHTML = `<div class="empty-state" style="padding:24px 20px">Nenhum tópico ainda. Seja o primeiro! 📝</div>`;
+      return;
+    }
+    el.innerHTML = snap.docs.map(d => {
+      const t = d.data();
+      const replies = t.replies ? t.replies.length : 0;
+      return `<div class="topic-card" onclick="openFullDisc()">
+        <div class="topic-meta">
+          ${makeAvatar(t.authorName)}
+          <span class="topic-author-name">${t.authorName}</span>
+          <span class="topic-time">${timeAgo(t.createdAt)}</span>
+        </div>
+        <div class="topic-text">${t.text}</div>
+        ${replies ? `<div class="topic-replies">↩ ${replies} resposta${replies>1?'s':''}</div>` : ''}
+      </div>`;
+    }).join('');
+  });
+}
+
+// ─── NEW TOPIC MODAL ───
+window.openNewTopicModal = function() {
+  if (!currentBook) { showToast('Nenhum livro registrado este mês.'); return; }
+  document.getElementById('new-topic-text').value = '';
+  openModal('modal-topic');
+};
+
+window.submitTopic = async function() {
+  const text = document.getElementById('new-topic-text').value.trim();
+  if (!text) { showToast('Escreva algo primeiro!'); return; }
+  await addDoc(collection(db,'topics'), {
+    bookId: currentBook.id,
+    authorId: currentUser.uid,
+    authorName: currentUserData.name || currentUser.email,
+    text, replies: [],
+    createdAt: serverTimestamp()
+  });
+  closeModal('modal-topic');
+  showToast('Tópico publicado! 🎉');
+};
+
+// ─── FULL DISCUSSION ───
+window.openFullDisc = function() {
+  goTo('disc');
+  renderDiscHeader();
+  loadFullTopics();
+};
+
+function renderDiscHeader() {
+  const el = document.getElementById('disc-header');
+  if (!currentBook) { el.innerHTML = ''; return; }
+  const b = currentBook;
+  const coverHtml = b.coverUrl
+    ? `<img src="${b.coverUrl}" class="disc-cover">`
+    : `<div class="disc-cover disc-cover-ph">📖</div>`;
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer" onclick="goTo('home')">
+      <span style="color:rgba(255,255,255,0.4);font-size:13px">← Voltar</span>
+    </div>
+    <div class="disc-book-mini">
+      ${coverHtml}
+      <div><div class="disc-title">${b.titulo}</div><div class="disc-author">${b.autor}</div></div>
+    </div>`;
+}
+
+function loadFullTopics() {
+  if (!currentBook) return;
+  const replyArea = document.getElementById('disc-reply-area');
+  replyArea.style.display = 'block';
+  document.getElementById('reply-context').textContent = `Postar no livro: ${currentBook.titulo}`;
+
+  const q = query(collection(db,'topics'), where('bookId','==',currentBook.id), orderBy('createdAt','asc'));
+  onSnapshot(q, snap => {
+    const el = document.getElementById('disc-topics');
+    if (snap.empty) {
+      el.innerHTML = `<div class="empty-state">Nenhum tópico ainda. Comece a discussão! 💬</div>`;
+      return;
+    }
+    el.innerHTML = snap.docs.map(d => {
+      const t = d.data();
+      const replies = (t.replies||[]).map(r =>
+        `<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(28,26,22,0.06);display:flex;gap:8px">
+          ${makeAvatar(r.authorName,24)}
+          <div>
+            <div style="font-size:11px;font-weight:500;color:var(--ink-light);margin-bottom:3px">${r.authorName}</div>
+            <div style="font-size:13px;color:var(--ink);line-height:1.5">${r.text}</div>
+          </div>
+        </div>`
+      ).join('');
+      return `<div class="full-topic-card">
+        <div class="topic-meta">
+          ${makeAvatar(t.authorName)}
+          <span class="topic-author-name">${t.authorName}</span>
+          <span class="topic-time">${timeAgo(t.createdAt)}</span>
+        </div>
+        <div class="topic-text">${t.text}</div>
+        ${replies}
+        <button style="font-size:11px;color:var(--amber);background:none;border:none;cursor:pointer;margin-top:10px;padding:0"
+          onclick="focusReply('${d.id}','${t.text.slice(0,30)}…')">↩ Responder</button>
+      </div>`;
+    }).join('');
+  });
+}
+
+let replyTargetId = null;
+window.focusReply = function(topicId, preview) {
+  replyTargetId = topicId;
+  document.getElementById('reply-context').textContent = `Respondendo: "${preview}"`;
+  document.getElementById('reply-input').focus();
+};
+
+window.postTopic = async function() {
+  const text = document.getElementById('reply-input').value.trim();
+  if (!text || !currentBook) return;
+
+  if (replyTargetId) {
+    const ref = doc(db,'topics',replyTargetId);
+    const snap = await getDoc(ref);
+    const replies = snap.data().replies || [];
+    replies.push({ authorId: currentUser.uid, authorName: currentUserData.name||currentUser.email, text, at: new Date().toISOString() });
+    await updateDoc(ref, { replies });
+    replyTargetId = null;
+    document.getElementById('reply-context').textContent = `Postar no livro: ${currentBook.titulo}`;
+  } else {
+    await addDoc(collection(db,'topics'), {
+      bookId: currentBook.id,
+      authorId: currentUser.uid,
+      authorName: currentUserData.name || currentUser.email,
+      text, replies: [],
+      createdAt: serverTimestamp()
+    });
+  }
+  document.getElementById('reply-input').value = '';
+  showToast('Publicado! ✅');
+};
+
+// ──────────────────────────────────────
+// ACERVO
+// ──────────────────────────────────────
+async function loadAcervo() {
+  const snap = await getDocs(collection(db,'books'));
+  const el = document.getElementById('acervo-list');
+  if (snap.empty) { el.innerHTML = `<div class="empty-state">Nenhum livro no acervo ainda.</div>`; return; }
+
+  const books = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.id.localeCompare(a.id));
+  el.innerHTML = books.map(b => {
+    const avg = b.avgStars ? b.avgStars.toFixed(1) : '—';
+    const coverHtml = b.coverUrl
+      ? `<img src="${b.coverUrl}" class="acervo-cover">`
+      : `<div class="acervo-cover acervo-cover-ph">📖</div>`;
+    const starsHtml = [1,2,3,4,5].map(i=>
+      `<span class="${i <= Math.round(b.avgStars||0) ? 'acervo-star-f' : 'acervo-star-e'}">★</span>`
+    ).join('');
+    return `<div class="acervo-card" onclick="openBookDetail('${b.id}')">
+      ${coverHtml}
+      <div class="acervo-info">
+        <div class="acervo-month">${b.id}</div>
+        <div class="acervo-title">${b.titulo}</div>
+        <div class="acervo-author">${b.autor}</div>
+        ${b.genero ? `<div class="acervo-genre-tag">${b.genero}</div>` : ''}
+        <div class="acervo-stars">${starsHtml}<span class="acervo-avg">${avg} · ${b.reviewCount||0} av.</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ──────────────────────────────────────
+// BOOK DETAIL
+// ──────────────────────────────────────
+window.openBookDetail = async function(bookId) {
+  const snap = await getDoc(doc(db,'books',bookId));
+  if (!snap.exists()) return;
+  const b = { id: bookId, ...snap.data() };
+
+  goTo('book-detail');
+
+  const coverHtml = b.coverUrl
+    ? `<img src="${b.coverUrl}" class="book-detail-cover">`
+    : `<div class="book-detail-cover book-detail-cover-ph">📖</div>`;
+
+  document.getElementById('detail-header').innerHTML = `
+    <div style="cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:16px" onclick="goTo('acervo')">← Acervo</div>
+    ${coverHtml}
+    <div class="book-detail-title">${b.titulo}</div>
+    <div class="book-detail-author">${b.autor}</div>
+    ${b.genero ? `<div class="book-detail-genre">${b.genero}</div>` : ''}
+    <div class="book-detail-meta">Escolhido por <strong>${b.escolhidoPor||'—'}</strong> · ${b.id}</div>`;
+
+  const revSnap = await getDocs(query(collection(db,'reviews'), where('bookId','==',bookId)));
+  const el = document.getElementById('detail-reviews');
+  if (revSnap.empty) { el.innerHTML = `<div class="empty-state" style="padding:24px 16px">Nenhuma avaliação ainda.</div>`; return; }
+
+  el.innerHTML = `<div style="padding:16px 16px 4px"><div class="section-title">⭐ Avaliações</div></div>` +
+    revSnap.docs.map(d => {
+      const r = d.data();
+      const starsHtml = [1,2,3,4,5].map(i=>
+        `<span class="${i<=r.stars?'review-star-f':'review-star-e'}">★</span>`
+      ).join('');
+      const chars = (r.personagens||[]).map(c=>`<span class="char-pill">${c}</span>`).join('');
+      return `<div class="review-card">
+        <div class="review-header">
+          ${makeAvatar(r.authorName,32)}
+          <div class="review-user">
+            <div class="review-user-name">${r.authorName}</div>
+            <div class="review-stars">${starsHtml}</div>
+          </div>
+        </div>
+        ${r.personagens?.length ? `<div class="review-field"><div class="review-field-label">Personagens</div><div class="char-pills">${chars}</div></div>` : ''}
+        ${r.trecho ? `<div class="review-field"><div class="review-field-label">Trecho favorito</div><div class="review-field-val" style="font-style:italic">"${r.trecho}"</div></div>` : ''}
+        ${r.comentario ? `<div class="review-field"><div class="review-field-label">Comentário</div><div class="review-field-val">${r.comentario}</div></div>` : ''}
+      </div>`;
+    }).join('');
+};
+
+// ──────────────────────────────────────
+// AVALIAR
+// ──────────────────────────────────────
+async function loadAvaliar() {
+  renderHero('avaliar');
+  reviewStars = 0; reviewChars = [];
+  document.getElementById('trecho-input').value = '';
+  document.getElementById('comment-input').value = '';
+  updateStarPicker();
+  renderCharTags();
+
+  if (!currentBook) return;
+
+  const revRef = doc(db,'reviews',`${currentBook.id}_${currentUser.uid}`);
+  const snap = await getDoc(revRef);
+  currentReview = snap.exists() ? snap.data() : null;
+
+  if (currentReview) {
+    document.getElementById('already-reviewed-msg').classList.remove('hidden');
+    document.getElementById('review-form').classList.add('hidden');
+  } else {
+    document.getElementById('already-reviewed-msg').classList.add('hidden');
+    document.getElementById('review-form').classList.remove('hidden');
+  }
+}
+
+window.editReview = function() {
+  if (!currentReview) return;
+  reviewStars = currentReview.stars || 0;
+  reviewChars = [...(currentReview.personagens||[])];
+  document.getElementById('trecho-input').value = currentReview.trecho||'';
+  document.getElementById('comment-input').value = currentReview.comentario||'';
+  updateStarPicker(); renderCharTags();
+  document.getElementById('already-reviewed-msg').classList.add('hidden');
+  document.getElementById('review-form').classList.remove('hidden');
+};
+
+window.pickStar = function(v) { reviewStars = v; updateStarPicker(); };
+function updateStarPicker() {
+  document.querySelectorAll('.star-pick').forEach(s => {
+    s.classList.toggle('on', parseInt(s.dataset.v) <= reviewStars);
+  });
+}
+
+window.addChar = function() {
+  const inp = document.getElementById('char-input');
+  const v = inp.value.trim();
+  if (!v) return;
+  reviewChars.push(v); inp.value = ''; renderCharTags();
+};
+window.charKeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); addChar(); } };
+window.removeChar = function(i) { reviewChars.splice(i,1); renderCharTags(); };
+function renderCharTags() {
+  document.getElementById('char-tags').innerHTML = reviewChars.map((c,i) =>
+    `<span class="char-tag">${c}<span class="char-tag-x" onclick="removeChar(${i})">×</span></span>`
+  ).join('');
+}
+
+window.submitReview = async function() {
+  if (!currentBook) { showToast('Nenhum livro este mês.'); return; }
+  if (!reviewStars) { showToast('Selecione sua nota!'); return; }
+  const trecho = document.getElementById('trecho-input').value.trim();
+  const comentario = document.getElementById('comment-input').value.trim();
+
+  const revId = `${currentBook.id}_${currentUser.uid}`;
+  await setDoc(doc(db,'reviews',revId), {
+    bookId: currentBook.id,
+    authorId: currentUser.uid,
+    authorName: currentUserData.name || currentUser.email,
+    stars: reviewStars,
+    personagens: reviewChars,
+    trecho, comentario,
+    updatedAt: serverTimestamp()
+  });
+
+  // Update avg
+  const revSnap = await getDocs(query(collection(db,'reviews'), where('bookId','==',currentBook.id)));
+  const all = revSnap.docs.map(d=>d.data().stars);
+  const avg = all.reduce((a,b)=>a+b,0)/all.length;
+  await updateDoc(doc(db,'books',currentBook.id), { avgStars: avg, reviewCount: all.length });
+
+  currentBook.avgStars = avg; currentBook.reviewCount = all.length;
+  showToast('Avaliação enviada! ⭐');
+  loadAvaliar();
+  renderHero('home');
+};
+
+// ──────────────────────────────────────
+// ADMIN — LIVRO
+// ──────────────────────────────────────
+window.previewCover = function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  pendingCoverFile = file;
+  const url = URL.createObjectURL(file);
+  document.getElementById('cover-preview').src = url;
+  document.getElementById('cover-preview').classList.remove('hidden');
+  document.getElementById('upload-placeholder').classList.add('hidden');
+};
+
+window.registerBook = async function() {
+  const titulo = document.getElementById('book-titulo').value.trim();
+  const autor = document.getElementById('book-autor').value.trim();
+  const genero = document.getElementById('book-genero').value;
+  const escolhidoPor = document.getElementById('book-escolhido').value.trim();
+  if (!titulo || !autor) { showToast('Preencha título e autor.'); return; }
+
+  const now = new Date();
+  const monthId = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  let coverUrl = null;
+  if (pendingCoverFile) {
+    const storageRef = ref(storage, `covers/${monthId}`);
+    await uploadBytes(storageRef, pendingCoverFile);
+    coverUrl = await getDownloadURL(storageRef);
+  }
+
+  await setDoc(doc(db,'books',monthId), { titulo, autor, genero, escolhidoPor, coverUrl, avgStars:0, reviewCount:0, createdAt: serverTimestamp() });
+
+  currentBook = { id: monthId, titulo, autor, genero, escolhidoPor, coverUrl, avgStars:0, reviewCount:0 };
+  renderHero('home');
+  showToast(`Livro "${titulo}" registrado! 📖`);
+
+  document.getElementById('book-titulo').value = '';
+  document.getElementById('book-autor').value = '';
+  document.getElementById('book-genero').value = '';
+  document.getElementById('book-escolhido').value = '';
+  document.getElementById('cover-preview').classList.add('hidden');
+  document.getElementById('upload-placeholder').classList.remove('hidden');
+  pendingCoverFile = null;
+};
+
+// ──────────────────────────────────────
+// ADMIN — SORTEIO
+// ──────────────────────────────────────
+async function loadFila() {
+  const snap = await getDoc(doc(db,'config','sorteio'));
+  filaState = snap.exists() ? (snap.data().fila || []) : [];
+  renderFila();
+}
+
+function renderFila() {
+  document.getElementById('fila-chips').innerHTML = filaState.map(m =>
+    `<div class="fila-chip ${m.done ? 'done' : ''}"><div class="fila-dot"></div>${m.name}</div>`
+  ).join('') || '<span style="font-size:12px;color:var(--ink-faint)">Fila vazia</span>';
+}
+
+window.sortearMembro = async function() {
+  const pending = filaState.filter(m => !m.done);
+  if (!pending.length) { showToast('Todos já foram sorteados! Reinicie a fila.'); return; }
+  const chosen = pending[Math.floor(Math.random() * pending.length)];
+  filaState = filaState.map(m => m.name === chosen.name ? {...m, done: true} : m);
+  document.getElementById('sorteio-membro-result').textContent = `${chosen.name} ✨`;
+  await setDoc(doc(db,'config','sorteio'), { fila: filaState });
+  renderFila();
+  showToast(`${chosen.name} foi sorteado/a! 🎉`);
+};
+
+window.resetFila = async function() {
+  if (!confirm('Reiniciar a fila do sorteio?')) return;
+  filaState = filaState.map(m => ({...m, done: false}));
+  await setDoc(doc(db,'config','sorteio'), { fila: filaState });
+  document.getElementById('sorteio-membro-result').textContent = '—';
+  renderFila();
+  showToast('Fila reiniciada!');
+};
+
+const genres = ['🌹 Romance','🧙 Fantasia','🔍 Suspense','🕵️ Policial','🚀 Ficção Científica',
+  '💡 Autoajuda','📜 Biografia','😂💕 Comédia Romântica','😂 Comédia','🇧🇷 Literatura Brasileira'];
+
+window.sortearGenero = function() {
+  const chips = document.querySelectorAll('#genre-grid .genre-chip');
+  chips.forEach(c => c.classList.remove('picked'));
+  const idx = Math.floor(Math.random() * genres.length);
+  chips[idx].classList.add('picked');
+  showToast(`Gênero sorteado: ${genres[idx]}`);
+};
+
+// ──────────────────────────────────────
+// ADMIN — MEMBROS
+// ──────────────────────────────────────
+async function loadMembers() {
+  const snap = await getDocs(collection(db,'users'));
+  const el = document.getElementById('members-list');
+  if (snap.empty) { el.innerHTML = '<div class="empty-state">Nenhum membro.</div>'; return; }
+  el.innerHTML = snap.docs.map(d => {
+    const u = d.data();
+    const isMe = d.id === currentUser.uid;
+    return `<div class="member-row">
+      ${makeAvatar(u.name||u.username, 32)}
+      <div class="member-info">
+        <div class="member-name">${u.name||'—'}</div>
+        <div class="member-email">@${u.username||''}</div>
+      </div>
+      <span class="member-role ${u.role==='admin'?'admin':''}">${u.role==='admin'?'ADM':'membro'}</span>
+      ${!isMe ? `<button class="member-del" onclick="deleteMember('${d.id}','${u.name}','${u.username}')">×</button>` : ''}
+    </div>`;
+  }).join('');
+
+  // Sync fila
+  const allNames = snap.docs.map(d=>d.data().name||d.data().username).filter(Boolean);
+  const filaNames = filaState.map(f=>f.name);
+  const toAdd = allNames.filter(n => !filaNames.includes(n));
+  if (toAdd.length) {
+    filaState = [...filaState, ...toAdd.map(name=>({name, done:false}))];
+    await setDoc(doc(db,'config','sorteio'), { fila: filaState });
+    renderFila();
+  }
+}
+
+window.confirmLogout = function() {
+  if (confirm('Sair do Clube Leitura?')) signOut(auth);
+};
+
+window.createMember = async function() {
+  const name = document.getElementById('new-member-name').value.trim();
+  const username = document.getElementById('new-member-username').value.trim().toLowerCase().replace(/\s+/g,'');
+  const pass = document.getElementById('new-member-pass').value;
+  if (!name || !username || !pass) { showToast('Preencha todos os campos.'); return; }
+
+  // Checar se username já existe
+  const unSnap = await getDoc(doc(db,'usernames', username));
+  if (unSnap.exists()) { showToast('Usuário já existe!'); return; }
+
+  const fakeEmail = `${username}@clubeleitura.app`;
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
+    await setDoc(doc(db,'users', cred.user.uid), { name, username, email: fakeEmail, role: 'member' });
+    await setDoc(doc(db,'usernames', username), { uid: cred.user.uid });
+    showToast(`${name} adicionado ao clube! ✅`);
+    document.getElementById('new-member-name').value = '';
+    document.getElementById('new-member-username').value = '';
+    document.getElementById('new-member-pass').value = '';
+    loadMembers();
+  } catch(e) {
+    showToast('Erro: ' + e.message);
+  }
+};
+
+window.deleteMember = async function(uid, name, username) {
+  if (!confirm(`Remover ${name} do clube?`)) return;
+  await deleteDoc(doc(db,'users',uid));
+  if (username) await deleteDoc(doc(db,'usernames',username));
+  filaState = filaState.filter(f => f.name !== name);
+  await setDoc(doc(db,'config','sorteio'), { fila: filaState });
+  loadMembers(); renderFila();
+  showToast(`${name} removido.`);
+};
+
+// ──────────────────────────────────────
+// NAVIGATION
+// ──────────────────────────────────────
+const navScreens = ['home','acervo','disc','avaliar','admin','book-detail'];
+
+window.goTo = function(screen) {
+  navScreens.forEach(s => {
+    document.getElementById(`screen-${s}`).classList.toggle('active', s === screen);
+    const nav = document.getElementById(`nav-${s}`);
+    if (nav) nav.classList.toggle('active', s === screen);
+  });
+
+  if (screen === 'acervo') loadAcervo();
+  if (screen === 'avaliar') loadAvaliar();
+  if (screen === 'admin') { loadMembers(); loadFila(); }
+};
+
+window.switchAdminTab = function(tab) {
+  document.querySelectorAll('.admin-tab').forEach((t,i) => {
+    const tabs = ['livro','sorteio','membros'];
+    t.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('.admin-panel').forEach(p => {
+    p.classList.toggle('active', p.id === `admin-${tab}`);
+  });
+};
+
+// ──────────────────────────────────────
+// MODAL & TOAST
+// ──────────────────────────────────────
+window.openModal = function(id) { document.getElementById(id).classList.add('open'); };
+window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
+
+window.showToast = function(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+};
+
+// ─── UTILS ───
+function timeAgo(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const diff = (Date.now() - d) / 1000;
+  if (diff < 60) return 'agora';
+  if (diff < 3600) return `há ${Math.floor(diff/60)}min`;
+  if (diff < 86400) return `há ${Math.floor(diff/3600)}h`;
+  if (diff < 172800) return 'ontem';
+  return `${Math.floor(diff/86400)}d`;
+}
+</script>
+</body>
+</html>
