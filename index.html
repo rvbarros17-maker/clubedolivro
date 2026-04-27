@@ -921,8 +921,7 @@ import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPas
 import { getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
   collection, query, where, orderBy, onSnapshot, serverTimestamp, Timestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
 
 // ════════════════════════════════════════
 // 🔥 FIREBASE CONFIG
@@ -940,7 +939,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
+
 
 // ─── STATE ───
 let currentUser = null;
@@ -1423,11 +1422,27 @@ window.submitReview = async function() {
 window.previewCover = function(e) {
   const file = e.target.files[0];
   if (!file) return;
-  pendingCoverFile = file;
-  const url = URL.createObjectURL(file);
-  document.getElementById('cover-preview').src = url;
-  document.getElementById('cover-preview').classList.remove('hidden');
-  document.getElementById('upload-placeholder').classList.add('hidden');
+
+  // Reduz a imagem antes de converter pra base64
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX = 400;
+      let w = img.width, h = img.height;
+      if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
+      else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      pendingCoverFile = canvas.toDataURL('image/jpeg', 0.75);
+      document.getElementById('cover-preview').src = pendingCoverFile;
+      document.getElementById('cover-preview').classList.remove('hidden');
+      document.getElementById('upload-placeholder').classList.add('hidden');
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
 };
 
 window.registerBook = async function() {
@@ -1440,12 +1455,8 @@ window.registerBook = async function() {
   const now = new Date();
   const monthId = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 
-  let coverUrl = null;
-  if (pendingCoverFile) {
-    const storageRef = ref(storage, `covers/${monthId}`);
-    await uploadBytes(storageRef, pendingCoverFile);
-    coverUrl = await getDownloadURL(storageRef);
-  }
+  // coverUrl agora é base64 direto — sem Firebase Storage
+  const coverUrl = pendingCoverFile || null;
 
   await setDoc(doc(db,'books',monthId), { titulo, autor, genero, escolhidoPor, coverUrl, avgStars:0, reviewCount:0, createdAt: serverTimestamp() });
 
