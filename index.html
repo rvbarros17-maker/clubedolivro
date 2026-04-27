@@ -705,12 +705,17 @@ body {
   <div class="content">
     <!-- HOME -->
     <div id="screen-home" class="screen active">
+      <div style="background:var(--ink);padding:8px 20px 0;display:flex;align-items:center;justify-content:space-between;">
+        <button onclick="changeHomeMonth(-1)" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:22px;cursor:pointer;padding:4px 8px;">‹</button>
+        <div id="home-month-label" style="font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;"></div>
+        <button onclick="changeHomeMonth(1)" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:22px;cursor:pointer;padding:4px 8px;">›</button>
+      </div>
       <div class="hero-section" id="home-hero">
         <div class="no-book-msg">Nenhum livro registrado este mês.</div>
       </div>
       <div class="section-header">
         <div class="section-title">💬 Discussões</div>
-        <button class="btn btn-primary btn-sm" onclick="openNewTopicModal()">+ Tópico</button>
+        <button class="btn btn-primary btn-sm" id="btn-new-topic" onclick="openNewTopicModal()">+ Tópico</button>
       </div>
       <div id="topics-list"></div>
     </div>
@@ -978,6 +983,7 @@ let reviewChars = [];
 let pendingCoverFile = null;
 let filaState = [];
 let unsubTopics = null;
+let homeDate = new Date(); // mês exibido na home
 
 // ─── AVATAR COLORS ───
 const avatarColors = ['#7A2E3C','#5C7A5E','#C8852A','#4A6B8A','#6B4A8A','#8A6B4A','#3C6B7A','#7A6B3C'];
@@ -1105,9 +1111,31 @@ async function loadHome() {
   loadTopics();
 }
 
-async function loadCurrentBook() {
+window.changeHomeMonth = function(delta) {
+  homeDate = new Date(homeDate.getFullYear(), homeDate.getMonth() + delta, 1);
+  loadHome();
+};
+
+function getHomeMonthId() {
+  return `${homeDate.getFullYear()}-${String(homeDate.getMonth()+1).padStart(2,'0')}`;
+}
+
+function updateHomeMonthLabel() {
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+    'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const now = new Date();
-  const monthId = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const isCurrentMonth = homeDate.getMonth() === now.getMonth() && homeDate.getFullYear() === now.getFullYear();
+  const label = `${months[homeDate.getMonth()]} ${homeDate.getFullYear()}${isCurrentMonth ? ' · atual' : ''}`;
+  const el = document.getElementById('home-month-label');
+  if (el) el.textContent = label;
+  // Só mostra botão de tópico no mês atual
+  const btnTopic = document.getElementById('btn-new-topic');
+  if (btnTopic) btnTopic.style.display = isCurrentMonth ? '' : 'none';
+}
+
+async function loadCurrentBook() {
+  const monthId = getHomeMonthId();
+  updateHomeMonthLabel();
   const snap = await getDoc(doc(db, 'books', monthId));
   currentBook = snap.exists() ? { id: monthId, ...snap.data() } : null;
   renderHero();
@@ -1147,8 +1175,7 @@ function renderHero(target='home') {
 function monthLabel() {
   const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
     'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const d = new Date();
-  return `${months[d.getMonth()]} ${d.getFullYear()}`;
+  return `${months[homeDate.getMonth()]} ${homeDate.getFullYear()}`;
 }
 
 // ─── TOPICS ───
