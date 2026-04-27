@@ -789,6 +789,17 @@ body {
       <div id="admin-livro" class="admin-panel active">
         <div class="admin-card">
           <div class="admin-card-title">📖 Registrar livro do mês</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <select class="form-select" id="book-mes" style="flex:1">
+              <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+              <option value="03">Março</option><option value="04">Abril</option>
+              <option value="05">Maio</option><option value="06">Junho</option>
+              <option value="07">Julho</option><option value="08">Agosto</option>
+              <option value="09">Setembro</option><option value="10">Outubro</option>
+              <option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
+            <select class="form-select" id="book-ano" style="width:100px"></select>
+          </div>
           <input class="form-input" id="book-titulo" placeholder="Título do livro" style="margin-bottom:10px">
           <input class="form-input" id="book-autor" placeholder="Autor" style="margin-bottom:10px">
           <select class="form-select" id="book-genero" style="margin-bottom:10px">
@@ -815,6 +826,22 @@ body {
           </div>
           <input type="file" id="cover-upload" accept="image/*" class="hidden" onchange="previewCover(event)">
           <button class="btn btn-primary" onclick="registerBook()">➕ Registrar livro</button>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">🗑️ Apagar livro</div>
+          <div style="font-size:13px;color:var(--ink-faint);margin-bottom:12px">Selecione o mês e ano do livro a apagar.</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <select class="form-select" id="del-mes" style="flex:1">
+              <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+              <option value="03">Março</option><option value="04">Abril</option>
+              <option value="05">Maio</option><option value="06">Junho</option>
+              <option value="07">Julho</option><option value="08">Agosto</option>
+              <option value="09">Setembro</option><option value="10">Outubro</option>
+              <option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
+            <select class="form-select" id="del-ano" style="width:100px"></select>
+          </div>
+          <button class="btn btn-danger" onclick="deleteBook()">🗑️ Apagar livro</button>
         </div>
       </div>
 
@@ -1032,6 +1059,24 @@ window.doLogin = async function() {
 };
 
 // ─── START APP ───
+function populateYearSelects() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const years = [year - 1, year, year + 1];
+  ['book-ano', 'del-ano'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+    el.value = year;
+  });
+  // Set current month as default
+  const mesEl = document.getElementById('book-mes');
+  if (mesEl) mesEl.value = String(month).padStart(2,'0');
+  const delMesEl = document.getElementById('del-mes');
+  if (delMesEl) delMesEl.value = String(month).padStart(2,'0');
+}
+
 function startApp() {
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
@@ -1045,6 +1090,7 @@ function startApp() {
   if (isAdmin) {
     document.getElementById('admin-pill').classList.remove('hidden');
     document.getElementById('nav-admin').classList.remove('hidden');
+    populateYearSelects();
   }
 
   loadHome();
@@ -1452,8 +1498,9 @@ window.registerBook = async function() {
   const escolhidoPor = document.getElementById('book-escolhido').value.trim();
   if (!titulo || !autor) { showToast('Preencha título e autor.'); return; }
 
-  const now = new Date();
-  const monthId = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const mes = document.getElementById('book-mes').value;
+  const ano = document.getElementById('book-ano').value;
+  const monthId = `${ano}-${mes}`;
 
   // coverUrl agora é base64 direto — sem Firebase Storage
   const coverUrl = pendingCoverFile || null;
@@ -1471,6 +1518,31 @@ window.registerBook = async function() {
   document.getElementById('cover-preview').classList.add('hidden');
   document.getElementById('upload-placeholder').classList.remove('hidden');
   pendingCoverFile = null;
+};
+
+window.deleteBook = async function() {
+  const mes = document.getElementById('del-mes').value;
+  const ano = document.getElementById('del-ano').value;
+  const monthId = `${ano}-${mes}`;
+  const snap = await getDoc(doc(db,'books', monthId));
+  if (!snap.exists()) { showToast('Nenhum livro encontrado nesse mês.'); return; }
+  const titulo = snap.data().titulo;
+  if (!confirm(`Apagar "${titulo}" (${mes}/${ano})? Isso também apaga as avaliações!`)) return;
+  // Apaga avaliações do livro
+  const revSnap = await getDocs(query(collection(db,'reviews'), where('bookId','==',monthId)));
+  for (const d of revSnap.docs) await deleteDoc(doc(db,'reviews',d.id));
+  // Apaga tópicos
+  const topSnap = await getDocs(query(collection(db,'topics'), where('bookId','==',monthId)));
+  for (const d of topSnap.docs) await deleteDoc(doc(db,'topics',d.id));
+  // Apaga o livro
+  await deleteDoc(doc(db,'books', monthId));
+  // Se era o livro atual, limpa
+  if (currentBook && currentBook.id === monthId) {
+    currentBook = null;
+    renderHero('home');
+    loadTopics();
+  }
+  showToast(`"${titulo}" apagado com sucesso.`);
 };
 
 // ──────────────────────────────────────
