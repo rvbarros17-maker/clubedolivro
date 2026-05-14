@@ -451,6 +451,30 @@ body {
   padding: 16px; margin-bottom: 14px;
   box-shadow: var(--shadow-sm);
 }
+.genero-chip {
+  display:inline-flex; align-items:center;
+  background: var(--paper); border: 1.5px solid rgba(28,26,22,0.1);
+  border-radius: 20px; padding: 6px 12px;
+  font-size: 12px; color: var(--ink-light);
+  cursor: pointer; transition: all 0.15s;
+  user-select: none;
+}
+.genero-chip.selected {
+  background: var(--amber-bg); border-color: var(--amber);
+  color: var(--amber); font-weight: 600;
+}
+.escolhido-chip {
+  display:inline-flex; align-items:center; gap:6px;
+  background: var(--paper); border: 1.5px solid rgba(28,26,22,0.1);
+  border-radius: 20px; padding: 6px 12px;
+  font-size: 12px; color: var(--ink-light);
+  cursor: pointer; transition: all 0.15s;
+  user-select: none;
+}
+.escolhido-chip.selected {
+  background: var(--amber-bg); border-color: var(--amber);
+  color: var(--amber); font-weight: 600;
+}
 .admin-card-title {
   font-family: 'Playfair Display', serif;
   font-size: 16px; color: var(--ink); margin-bottom: 14px;
@@ -795,7 +819,7 @@ body {
       <!-- TAB LIVRO -->
       <div id="admin-livro" class="admin-panel active">
         <div class="admin-card">
-          <div class="admin-card-title">📖 Registrar livro do mês</div>
+          <div class="admin-card-title" id="book-form-title">📖 Registrar livro do mês</div>
           <div style="display:flex;gap:8px;margin-bottom:10px">
             <select class="form-select" id="book-mes" style="flex:1">
               <option value="01">Janeiro</option><option value="02">Fevereiro</option>
@@ -809,20 +833,26 @@ body {
           </div>
           <input class="form-input" id="book-titulo" placeholder="Título do livro" style="margin-bottom:10px">
           <input class="form-input" id="book-autor" placeholder="Autor" style="margin-bottom:10px">
-          <select class="form-select" id="book-genero" style="margin-bottom:10px">
-            <option value="">Selecione o gênero…</option>
-            <option>🌹 Romance</option>
-            <option>🧙 Fantasia</option>
-            <option>🔍 Suspense</option>
-            <option>🕵️ Policial</option>
-            <option>🚀 Ficção Científica</option>
-            <option>💡 Autoajuda</option>
-            <option>📜 Biografia</option>
-            <option>😂💕 Comédia Romântica</option>
-            <option>😂 Comédia</option>
-            <option>🇧🇷 Literatura Brasileira</option>
-          </select>
-          <input class="form-input" id="book-escolhido" placeholder="Escolhido por…" style="margin-bottom:10px">
+          <div style="margin-bottom:10px">
+            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ink-light);margin-bottom:8px">Gêneros (selecione um ou mais)</div>
+            <div id="genero-chips" style="display:flex;flex-wrap:wrap;gap:6px">
+              <div class="genero-chip" onclick="toggleGenero(this)" data-v="🌹 Romance">🌹 Romance</div>
+              <div class="genero-chip" onclick="toggleGenero(this)" data-v="🧙 Fantasia">🧙 Fantasia</div>
+              <div class="genero-chip" onclick="toggleGenero(this)" data-v="🔍 Suspense">🔍 Suspense</div>
+              <div class="genero-chip" onclick="toggleGenero(this)" data-v="🕵️ Policial">🕵️ Policial</div>
+              <div class="genero-chip" onclick="toggleGenero(this)" data-v="🚀 Ficção Científica">🚀 Ficção Científica</div>
+              <div class="genero-chip" onclick="toggleGenero(this)" data-v="💡 Autoajuda">💡 Autoajuda</div>
+              <div class="genero-chip" onclick="toggleGenero(this)" data-v="📜 Biografia">📜 Biografia</div>
+              <div class="genero-chip" onclick="toggleGenero(this)" data-v="😂💕 Comédia Romântica">😂💕 Comédia Romântica</div>
+              <div class="genero-chip" onclick="toggleGenero(this)" data-v="😂 Comédia">😂 Comédia</div>
+              <div class="genero-chip" onclick="toggleGenero(this)" data-v="🇧🇷 Literatura Brasileira">🇧🇷 Literatura Brasileira</div>
+            </div>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ink-light);margin-bottom:8px">Escolhido por</div>
+            <div id="escolhido-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+            <div style="font-size:11px;color:var(--ink-faint)">Selecione um membro acima</div>
+          </div>
           <div class="upload-area" onclick="document.getElementById('cover-upload').click()">
             <img id="cover-preview" class="upload-preview hidden">
             <div id="upload-placeholder">
@@ -832,7 +862,26 @@ body {
             </div>
           </div>
           <input type="file" id="cover-upload" accept="image/*" class="hidden" onchange="previewCover(event)">
-          <button class="btn btn-primary" onclick="registerBook()">➕ Registrar livro</button>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-primary" onclick="registerBook()" id="btn-register-book">➕ Registrar livro</button>
+            <button class="btn btn-secondary hidden" onclick="cancelEditBook()" id="btn-cancel-edit" style="width:auto;padding:12px 16px">✕</button>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">✏️ Editar livro registrado</div>
+          <div style="font-size:13px;color:var(--ink-faint);margin-bottom:12px">Selecione o mês para carregar e editar.</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <select class="form-select" id="edit-mes" style="flex:1">
+              <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+              <option value="03">Março</option><option value="04">Abril</option>
+              <option value="05">Maio</option><option value="06">Junho</option>
+              <option value="07">Julho</option><option value="08">Agosto</option>
+              <option value="09">Setembro</option><option value="10">Outubro</option>
+              <option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
+            <select class="form-select" id="edit-ano" style="width:100px"></select>
+          </div>
+          <button class="btn btn-dark" onclick="loadBookForEdit()">📂 Carregar livro</button>
         </div>
         <div class="admin-card">
           <div class="admin-card-title">🗑️ Apagar livro</div>
@@ -1057,9 +1106,10 @@ window.confirmLogout=function(){
 function populateYearSelects(){
   const now=new Date(),year=now.getFullYear(),month=now.getMonth()+1;
   const years=[year-1,year,year+1];
-  ['book-ano','del-ano'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');el.value=year;});
+  ['book-ano','del-ano','edit-ano'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');el.value=year;});
   const m=document.getElementById('book-mes');if(m)m.value=String(month).padStart(2,'0');
   const dm=document.getElementById('del-mes');if(dm)dm.value=String(month).padStart(2,'0');
+  const em=document.getElementById('edit-mes');if(em)em.value=String(month).padStart(2,'0');
 }
 
 function startApp(){
@@ -1318,23 +1368,125 @@ window.previewCover=function(e){
   };reader.readAsDataURL(file);
 };
 
+// ─── Gênero chips ───
+window.toggleGenero=function(el){el.classList.toggle('selected');};
+function getGenerosSelected(){
+  return [...document.querySelectorAll('#genero-chips .genero-chip.selected')].map(c=>c.dataset.v).join(', ');
+}
+function clearGenerosSelected(){
+  document.querySelectorAll('#genero-chips .genero-chip').forEach(c=>c.classList.remove('selected'));
+}
+function setGenerosSelected(generoStr){
+  clearGenerosSelected();
+  if(!generoStr)return;
+  const vals=generoStr.split(', ');
+  document.querySelectorAll('#genero-chips .genero-chip').forEach(c=>{
+    if(vals.includes(c.dataset.v))c.classList.add('selected');
+  });
+}
+
+// ─── Escolhido chips ───
+let escolhidoSelecionado='';
+function renderEscolhidoList(members){
+  const el=document.getElementById('escolhido-list');
+  if(!el)return;
+  el.innerHTML=members.map(m=>`<div class="escolhido-chip ${escolhidoSelecionado===m?'selected':''}" onclick="selectEscolhido('${m}')">${m}</div>`).join('');
+}
+window.selectEscolhido=function(name){
+  escolhidoSelecionado=escolhidoSelecionado===name?'':name;
+  document.querySelectorAll('.escolhido-chip').forEach(c=>{
+    c.classList.toggle('selected', c.textContent===escolhidoSelecionado);
+  });
+};
+
+// ─── Editar livro ───
+let editingBookId=null;
+window.loadBookForEdit=async function(){
+  const mes=document.getElementById('edit-mes').value;
+  const ano=document.getElementById('edit-ano').value;
+  const monthId=`${ano}-${mes}`;
+  const snap=await db.collection('books').doc(monthId).get();
+  if(!snap.exists){showToast('Nenhum livro encontrado nesse mês.');return;}
+  const b=snap.data();
+  editingBookId=monthId;
+  // Preencher form
+  document.getElementById('book-mes').value=mes;
+  document.getElementById('book-ano').value=ano;
+  document.getElementById('book-titulo').value=b.titulo||'';
+  document.getElementById('book-autor').value=b.autor||'';
+  setGenerosSelected(b.genero||'');
+  escolhidoSelecionado=b.escolhidoPor||'';
+  document.querySelectorAll('.escolhido-chip').forEach(c=>{
+    c.classList.toggle('selected',c.textContent===escolhidoSelecionado);
+  });
+  if(b.coverUrl){
+    document.getElementById('cover-preview').src=b.coverUrl;
+    document.getElementById('cover-preview').classList.remove('hidden');
+    document.getElementById('upload-placeholder').classList.add('hidden');
+  }
+  document.getElementById('book-form-title').textContent='✏️ Editando livro';
+  document.getElementById('btn-register-book').textContent='💾 Salvar alterações';
+  document.getElementById('btn-cancel-edit').classList.remove('hidden');
+  // Scroll para o form
+  document.getElementById('book-form-title').scrollIntoView({behavior:'smooth'});
+  showToast(`Livro "${b.titulo}" carregado para edição!`);
+};
+
+window.cancelEditBook=function(){
+  editingBookId=null;
+  document.getElementById('book-titulo').value='';
+  document.getElementById('book-autor').value='';
+  clearGenerosSelected();
+  escolhidoSelecionado='';
+  document.querySelectorAll('.escolhido-chip').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('cover-preview').classList.add('hidden');
+  document.getElementById('upload-placeholder').classList.remove('hidden');
+  pendingCoverFile=null;
+  document.getElementById('book-form-title').textContent='📖 Registrar livro do mês';
+  document.getElementById('btn-register-book').textContent='➕ Registrar livro';
+  document.getElementById('btn-cancel-edit').classList.add('hidden');
+};
+
 window.registerBook=async function(){
   const titulo=document.getElementById('book-titulo').value.trim();
   const autor=document.getElementById('book-autor').value.trim();
-  const genero=document.getElementById('book-genero').value;
-  const escolhidoPor=document.getElementById('book-escolhido').value.trim();
+  const genero=getGenerosSelected();
+  const escolhidoPor=escolhidoSelecionado||'';
   if(!titulo||!autor){showToast('Preencha título e autor.');return;}
+  if(!genero){showToast('Selecione pelo menos um gênero!');return;}
   const mes=document.getElementById('book-mes').value;
   const ano=document.getElementById('book-ano').value;
   const monthId=`${ano}-${mes}`;
   const coverUrl=pendingCoverFile||null;
-  await db.collection('books').doc(monthId).set({titulo,autor,genero,escolhidoPor,coverUrl,avgStars:0,reviewCount:0,createdAt:TS()});
-  currentBook={id:monthId,titulo,autor,genero,escolhidoPor,coverUrl,avgStars:0,reviewCount:0};
-  renderHero('home');showToast(`Livro "${titulo}" registrado! 📖`);
-  document.getElementById('book-titulo').value='';document.getElementById('book-autor').value='';
-  document.getElementById('book-genero').value='';document.getElementById('book-escolhido').value='';
-  document.getElementById('cover-preview').classList.add('hidden');document.getElementById('upload-placeholder').classList.remove('hidden');
-  pendingCoverFile=null;
+
+  if(editingBookId){
+    // Editar — preservar avgStars e reviewCount
+    const snap=await db.collection('books').doc(editingBookId).get();
+    const existing=snap.exists?snap.data():{};
+    await db.collection('books').doc(editingBookId).set({
+      titulo,autor,genero,escolhidoPor,
+      coverUrl: coverUrl||existing.coverUrl||null,
+      avgStars:existing.avgStars||0,
+      reviewCount:existing.reviewCount||0,
+      createdAt:existing.createdAt||TS()
+    });
+    if(currentBook&&currentBook.id===editingBookId){
+      currentBook={...currentBook,titulo,autor,genero,escolhidoPor,coverUrl:coverUrl||currentBook.coverUrl};
+      renderHero('home');
+    }
+    showToast(`Livro "${titulo}" atualizado! ✅`);
+    cancelEditBook();
+  } else {
+    await db.collection('books').doc(monthId).set({titulo,autor,genero,escolhidoPor,coverUrl,avgStars:0,reviewCount:0,createdAt:TS()});
+    currentBook={id:monthId,titulo,autor,genero,escolhidoPor,coverUrl,avgStars:0,reviewCount:0};
+    renderHero('home');
+    showToast(`Livro "${titulo}" registrado! 📖`);
+    clearGenerosSelected();
+    escolhidoSelecionado='';
+    document.getElementById('book-titulo').value='';document.getElementById('book-autor').value='';
+    document.getElementById('cover-preview').classList.add('hidden');document.getElementById('upload-placeholder').classList.remove('hidden');
+    pendingCoverFile=null;
+  }
 };
 
 window.deleteBook=async function(){
@@ -1400,6 +1552,10 @@ async function loadMembers(){
       ${!isMe?`<button class="member-del" onclick="deleteMember('${d.id}','${u.name}','${u.username}')">×</button>`:''}
     </div>`;
   }).join('');
+  // Popular lista "Escolhido por"
+  const allMemberNames=snap.docs.map(d=>d.data().name||d.data().username).filter(Boolean);
+  renderEscolhidoList(allMemberNames);
+
   const allNames=snap.docs.map(d=>d.data().name||d.data().username).filter(Boolean);
   const filaNames=filaState.map(f=>f.name);
   const toAdd=allNames.filter(n=>!filaNames.includes(n));
