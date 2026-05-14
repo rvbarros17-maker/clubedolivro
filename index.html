@@ -1004,18 +1004,8 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('setup-screen').classList.add('hidden');
     startApp();
   } else {
-    // Verificar setup via documento público, sem precisar de auth
-    try {
-      const setupSnap = await db.collection('config').doc('appSetup').get();
-      if(!setupSnap.exists || !setupSnap.data().adminCreated) {
-        document.getElementById('setup-screen').classList.remove('hidden');
-      } else {
-        document.getElementById('login-screen').classList.remove('hidden');
-      }
-    } catch(e) {
-      // Se falhar, mostra login direto
-      document.getElementById('login-screen').classList.remove('hidden');
-    }
+    // Sempre mostra login — setup só aparece se não houver usuário no Firebase
+    document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('app').classList.add('hidden');
   }
 });
