@@ -965,6 +965,18 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+// Timeout de segurança — se Firebase demorar, mostra login
+setTimeout(()=>{
+  const loading = document.getElementById('loading-screen');
+  if(loading && !loading.classList.contains('hidden')){
+    loading.style.opacity='0';
+    setTimeout(()=>{
+      loading.classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+    },400);
+  }
+}, 5000);
 const TS = firebase.firestore.FieldValue.serverTimestamp;
 
 // ─── STATE ───
@@ -981,8 +993,9 @@ function timeAgo(ts){if(!ts)return'';const d=ts.toDate?ts.toDate():new Date(ts);
 
 // ─── AUTH STATE ───
 auth.onAuthStateChanged(async user => {
-  document.getElementById('loading-screen').style.opacity='0';
-  setTimeout(()=>document.getElementById('loading-screen').classList.add('hidden'),400);
+  const loadingEl = document.getElementById('loading-screen');
+  loadingEl.style.opacity='0';
+  setTimeout(()=>loadingEl.classList.add('hidden'),400);
   if(user){
     currentUser=user;
     const snap=await db.collection('users').doc(user.uid).get();
@@ -1029,7 +1042,16 @@ window.doLogin=async function(){
   }catch(e){errEl.textContent='Usuário ou senha incorretos.';errEl.style.display='block';}
 };
 
-window.confirmLogout=function(){if(confirm('Sair do Clube Leitura?'))auth.signOut();};
+window.confirmLogout=function(){
+  if(confirm('Sair do Clube Leitura?')){
+    auth.signOut().then(()=>{
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('login-username').value='';
+      document.getElementById('login-password').value='';
+    });
+  }
+};
 
 // ─── START APP ───
 function populateYearSelects(){
@@ -1437,7 +1459,7 @@ window.showToast=function(msg){const t=document.getElementById('toast');t.textCo
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js');
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
     });
   }
 </script>
