@@ -69,6 +69,39 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+#cadastro-screen {
+  position: fixed; inset: 0;
+  background: var(--ink);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 28px; z-index: 100;
+  overflow-y: auto;
+}
+.notification-bell {
+  position: relative; cursor: pointer;
+  background: rgba(255,255,255,0.08);
+  border: none; width: 36px; height: 36px;
+  border-radius: 50%; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.notif-badge {
+  position: absolute; top: -4px; right: -4px;
+  background: var(--burgundy); color: white;
+  font-size: 10px; font-weight: 700;
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--ink);
+}
+.pendente-card {
+  background: white; border-radius: var(--radius);
+  padding: 14px 16px; margin-bottom: 10px;
+  box-shadow: var(--shadow-sm);
+}
+.pendente-info { margin-bottom: 10px; }
+.pendente-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+.pendente-detail { font-size: 12px; color: var(--ink-faint); margin-top: 2px; }
+.pendente-actions { display: flex; gap: 8px; }
 #setup-screen {
   position: fixed; inset: 0;
   background: var(--ink);
@@ -701,6 +734,30 @@ body {
     <input id="login-password" class="login-input" type="password" placeholder="Senha" autocomplete="current-password">
     <div id="login-error" class="login-error"></div>
     <button class="btn btn-primary mt-8" onclick="doLogin()">Entrar no clube</button>
+    <div style="text-align:center;margin-top:16px">
+      <span style="font-size:13px;color:rgba(255,255,255,0.35)">Quer participar? </span>
+      <span style="font-size:13px;color:var(--amber-light);cursor:pointer;font-weight:500" onclick="showCadastro()">Solicitar acesso</span>
+    </div>
+  </div>
+</div>
+
+<!-- CADASTRO -->
+<div id="cadastro-screen" class="hidden">
+  <div class="login-logo">Clube<span>Leitura</span></div>
+  <div class="login-tagline">Solicitar participação no clube</div>
+  <div class="login-card" style="max-width:360px;width:100%">
+    <h2>Cadastro</h2>
+    <input id="cad-name" class="login-input" type="text" placeholder="Nome completo">
+    <input id="cad-nascimento" class="login-input" type="date" placeholder="Data de nascimento">
+    <input id="cad-email" class="login-input" type="email" placeholder="Email">
+    <input id="cad-telefone" class="login-input" type="tel" placeholder="Telefone (ex: 44999999999)">
+    <input id="cad-username" class="login-input" type="text" placeholder="Usuário (ex: mariaalves)" autocapitalize="none">
+    <input id="cad-pass" class="login-input" type="password" placeholder="Senha (mín. 6 caracteres)">
+    <div id="cad-error" class="login-error"></div>
+    <button class="btn btn-primary mt-8" onclick="doCadastro()">Enviar solicitação</button>
+    <div style="text-align:center;margin-top:12px">
+      <span style="font-size:13px;color:rgba(255,255,255,0.35);cursor:pointer" onclick="showLogin()">← Voltar ao login</span>
+    </div>
   </div>
 </div>
 
@@ -724,6 +781,9 @@ body {
     <div class="header-logo">Clube<span>Leitura</span></div>
     <div class="header-right">
       <div id="admin-pill" class="admin-pill hidden">ADM</div>
+      <button id="notif-bell" class="notification-bell hidden" onclick="goTo('admin');switchAdminTab('membros');switchMembrosTab('pendentes')">
+        🔔<span id="notif-badge" class="notif-badge hidden">0</span>
+      </button>
       <div id="header-avatar" class="header-avatar" onclick="confirmLogout()"></div>
     </div>
   </div>
@@ -937,16 +997,39 @@ body {
 
       <!-- TAB MEMBROS -->
       <div id="admin-membros" class="admin-panel">
-        <div class="admin-card">
-          <div class="admin-card-title">➕ Adicionar membro</div>
-          <input class="form-input" id="new-member-name" placeholder="Nome completo" style="margin-bottom:10px">
-          <input class="form-input" id="new-member-username" placeholder="Usuário (ex: mariaalves)" autocapitalize="none" style="margin-bottom:10px">
-          <input class="form-input" id="new-member-pass" placeholder="Senha inicial" type="password" style="margin-bottom:10px">
-          <button class="btn btn-primary" onclick="createMember()">➕ Criar membro</button>
+        <!-- Sub-abas -->
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button class="admin-tab active" id="mtab-membros" onclick="switchMembrosTab('membros')" style="flex:1">👥 Membros</button>
+          <button class="admin-tab" id="mtab-pendentes" onclick="switchMembrosTab('pendentes')" style="flex:1;position:relative">
+            ⏳ Pendentes
+            <span id="pendentes-badge" class="notif-badge hidden" style="position:absolute;top:-6px;right:-6px">0</span>
+          </button>
+          <button class="admin-tab" id="mtab-adicionar" onclick="switchMembrosTab('adicionar')" style="flex:1">➕ Adicionar</button>
         </div>
-        <div class="admin-card">
+
+        <!-- Painel membros -->
+        <div id="mpanel-membros" class="admin-card">
           <div class="admin-card-title">👥 Membros do clube</div>
           <div id="members-list"></div>
+        </div>
+
+        <!-- Painel pendentes -->
+        <div id="mpanel-pendentes" class="hidden">
+          <div class="admin-card">
+            <div class="admin-card-title">⏳ Solicitações pendentes</div>
+            <div id="pendentes-list"><div class="empty-state">Nenhuma solicitação pendente.</div></div>
+          </div>
+        </div>
+
+        <!-- Painel adicionar -->
+        <div id="mpanel-adicionar" class="hidden">
+          <div class="admin-card">
+            <div class="admin-card-title">➕ Adicionar membro</div>
+            <input class="form-input" id="new-member-name" placeholder="Nome completo" style="margin-bottom:10px">
+            <input class="form-input" id="new-member-username" placeholder="Usuário (ex: mariaalves)" autocapitalize="none" style="margin-bottom:10px">
+            <input class="form-input" id="new-member-pass" placeholder="Senha inicial" type="password" style="margin-bottom:10px">
+            <button class="btn btn-primary" onclick="createMember()">➕ Criar membro</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1049,6 +1132,14 @@ auth.onAuthStateChanged(async user => {
     currentUser=user;
     const snap=await db.collection('users').doc(user.uid).get();
     currentUserData=snap.exists?snap.data():{name:user.email,role:'member'};
+    if(currentUserData.role==='pendente'){
+      await auth.signOut();
+      document.getElementById('login-error').textContent='Sua solicitação ainda está aguardando aprovação do administrador.';
+      document.getElementById('login-error').style.display='block';
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('app').classList.add('hidden');
+      return;
+    }
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('setup-screen').classList.add('hidden');
     startApp();
@@ -1121,6 +1212,7 @@ function startApp(){
   const isAdmin=currentUserData.role==='admin';
   if(isAdmin){document.getElementById('admin-pill').classList.remove('hidden');document.getElementById('nav-admin').classList.remove('hidden');populateYearSelects();}
   loadHome();loadFila();
+  if(currentUserData.role==='admin')loadPendentes();
 }
 
 // ─── HOME ───
@@ -1561,6 +1653,103 @@ async function loadMembers(){
   const toAdd=allNames.filter(n=>!filaNames.includes(n));
   if(toAdd.length){filaState=[...filaState,...toAdd.map(name=>({name,done:false}))];await db.collection('config').doc('sorteio').set({fila:filaState});renderFila();}
 }
+
+// ─── CADASTRO / PENDENTES ───
+window.showCadastro=function(){
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('cadastro-screen').classList.remove('hidden');
+};
+window.showLogin=function(){
+  document.getElementById('cadastro-screen').classList.add('hidden');
+  document.getElementById('login-screen').classList.remove('hidden');
+};
+
+window.doCadastro=async function(){
+  const name=document.getElementById('cad-name').value.trim();
+  const nascimento=document.getElementById('cad-nascimento').value;
+  const email=document.getElementById('cad-email').value.trim();
+  const telefone=document.getElementById('cad-telefone').value.trim();
+  const username=document.getElementById('cad-username').value.trim().toLowerCase().replace(/\s+/g,'');
+  const pass=document.getElementById('cad-pass').value;
+  const errEl=document.getElementById('cad-error');
+  errEl.style.display='none';
+  if(!name||!username||!pass||!email){errEl.textContent='Preencha todos os campos obrigatórios.';errEl.style.display='block';return;}
+  if(pass.length<6){errEl.textContent='Senha mínima de 6 caracteres.';errEl.style.display='block';return;}
+  // Checar username duplicado
+  const unSnap=await db.collection('usernames').doc(username).get();
+  if(unSnap.exists){errEl.textContent='Este usuário já está em uso.';errEl.style.display='block';return;}
+  // Salvar como pendente
+  try{
+    const fakeEmail=`${username}@clubeleitura.app`;
+    const cred=await auth.createUserWithEmailAndPassword(fakeEmail,pass);
+    await db.collection('users').doc(cred.user.uid).set({
+      name,username,email,telefone,nascimento,
+      role:'pendente',
+      createdAt:TS()
+    });
+    await db.collection('usernames').doc(username).set({uid:cred.user.uid});
+    await auth.signOut();
+    // Limpar form
+    ['cad-name','cad-nascimento','cad-email','cad-telefone','cad-username','cad-pass'].forEach(id=>document.getElementById(id).value='');
+    showLogin();
+    showToast('Solicitação enviada! Aguarde aprovação do admin. ✅');
+  }catch(e){errEl.textContent='Erro: '+e.message;errEl.style.display='block';}
+};
+
+window.switchMembrosTab=function(tab){
+  ['membros','pendentes','adicionar'].forEach(t=>{
+    document.getElementById(`mtab-${t}`).classList.toggle('active',t===tab);
+    document.getElementById(`mpanel-${t}`).classList.toggle('hidden',t!==tab);
+  });
+  if(tab==='pendentes')loadPendentes();
+};
+
+async function loadPendentes(){
+  const snap=await db.collection('users').where('role','==','pendente').get();
+  const el=document.getElementById('pendentes-list');
+  const count=snap.size;
+  // Atualizar badges
+  const badge=document.getElementById('pendentes-badge');
+  const notifBadge=document.getElementById('notif-badge');
+  const bell=document.getElementById('notif-bell');
+  if(count>0){
+    badge.textContent=count;badge.classList.remove('hidden');
+    notifBadge.textContent=count;notifBadge.classList.remove('hidden');
+    bell.classList.remove('hidden');
+  }else{
+    badge.classList.add('hidden');notifBadge.classList.add('hidden');
+    bell.classList.add('hidden');
+  }
+  if(snap.empty){el.innerHTML='<div class="empty-state">Nenhuma solicitação pendente. 🎉</div>';return;}
+  el.innerHTML=snap.docs.map(d=>{
+    const u=d.data();
+    return`<div class="pendente-card">
+      <div class="pendente-info">
+        <div class="pendente-name">${u.name}</div>
+        <div class="pendente-detail">@${u.username} · ${u.email||'—'}</div>
+        <div class="pendente-detail">📱 ${u.telefone||'—'} · 🎂 ${u.nascimento||'—'}</div>
+      </div>
+      <div class="pendente-actions">
+        <button class="btn btn-primary btn-sm" onclick="aprovarMembro('${d.id}','${u.name}','${u.username}')">✅ Aprovar</button>
+        <button class="btn btn-danger btn-sm" onclick="rejeitarMembro('${d.id}','${u.name}','${u.username}')">❌ Rejeitar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.aprovarMembro=async function(uid,name,username){
+  await db.collection('users').doc(uid).update({role:'member'});
+  showToast(`${name} aprovado! ✅`);
+  loadPendentes();loadMembers();
+};
+
+window.rejeitarMembro=async function(uid,name,username){
+  if(!confirm(`Rejeitar e remover ${name}?`))return;
+  await db.collection('users').doc(uid).delete();
+  await db.collection('usernames').doc(username).delete();
+  showToast(`${name} removido.`);
+  loadPendentes();
+};
 
 window.createMember=async function(){
   const name=document.getElementById('new-member-name').value.trim();
