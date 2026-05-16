@@ -984,6 +984,22 @@ body {
           <button class="btn btn-dark" onclick="loadBookForEdit()">📂 Carregar livro</button>
         </div>
         <div class="admin-card">
+          <div class="admin-card-title">🔄 Zerar avaliações</div>
+          <div style="font-size:13px;color:var(--ink-faint);margin-bottom:12px">Apaga todas as avaliações de um mês e zera a média.</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <select class="form-select" id="zero-mes" style="flex:1">
+              <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+              <option value="03">Março</option><option value="04">Abril</option>
+              <option value="05">Maio</option><option value="06">Junho</option>
+              <option value="07">Julho</option><option value="08">Agosto</option>
+              <option value="09">Setembro</option><option value="10">Outubro</option>
+              <option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
+            <select class="form-select" id="zero-ano" style="width:100px"></select>
+          </div>
+          <button class="btn btn-danger" onclick="zerarAvaliacoes()">🔄 Zerar avaliações</button>
+        </div>
+        <div class="admin-card">
           <div class="admin-card-title">🗑️ Apagar livro</div>
           <div style="font-size:13px;color:var(--ink-faint);margin-bottom:12px">Selecione o mês e ano do livro a apagar.</div>
           <div style="display:flex;gap:8px;margin-bottom:10px">
@@ -1253,7 +1269,7 @@ window.confirmLogout=window.doLogout;
 function populateYearSelects(){
   const now=new Date(),year=now.getFullYear(),month=now.getMonth()+1;
   const years=[year-1,year,year+1];
-  ['book-ano','del-ano','edit-ano'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');el.value=year;});
+  ['book-ano','del-ano','edit-ano','zero-ano'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');el.value=year;});
   const m=document.getElementById('book-mes');if(m)m.value=String(month).padStart(2,'0');
   const dm=document.getElementById('del-mes');if(dm)dm.value=String(month).padStart(2,'0');
   const em=document.getElementById('edit-mes');if(em)em.value=String(month).padStart(2,'0');
@@ -1692,6 +1708,24 @@ window.registerBook=async function(){
   }
 };
 
+window.zerarAvaliacoes=async function(){
+  const mes=document.getElementById('zero-mes').value;
+  const ano=document.getElementById('zero-ano').value;
+  const monthId=`${ano}-${mes}`;
+  const bookSnap=await db.collection('books').doc(monthId).get();
+  if(!bookSnap.exists){showToast('Nenhum livro encontrado nesse mês.');return;}
+  const titulo=bookSnap.data().titulo;
+  if(!confirm(`Zerar TODAS as avaliações de "${titulo}" (${mes}/${ano})? Isso não pode ser desfeito!`))return;
+  const revSnap=await db.collection('reviews').where('bookId','==',monthId).get();
+  for(const d of revSnap.docs)await db.collection('reviews').doc(d.id).delete();
+  await db.collection('books').doc(monthId).update({avgStars:0,reviewCount:0});
+  if(currentBook&&currentBook.id===monthId){
+    currentBook.avgStars=0;currentBook.reviewCount=0;
+    renderHero('home');
+  }
+  showToast(`Avaliações de "${titulo}" zeradas! ✅`);
+};
+
 window.deleteBook=async function(){
   const mes=document.getElementById('del-mes').value;
   const ano=document.getElementById('del-ano').value;
@@ -1800,13 +1834,12 @@ window.doCadastro=async function(){
       createdAt:TS()
     });
     await db.collection('usernames').doc(username).set({uid:cred.user.uid});
-    skipAuthRedirect=true;
-    await auth.signOut();
-    // Limpar form
+    // Limpar form e mostrar sucesso ANTES do signOut para evitar race condition
     ['cad-name','cad-nascimento','cad-email','cad-telefone','cad-username','cad-pass'].forEach(id=>document.getElementById(id).value='');
-    // Mostrar tela de sucesso
     document.getElementById('cadastro-screen').classList.add('hidden');
     document.getElementById('cadastro-sucesso-screen').classList.remove('hidden');
+    skipAuthRedirect=true;
+    auth.signOut(); // sem await - não esperar
   }catch(e){errEl.textContent='Erro: '+e.message;errEl.style.display='block';}
 };
 
@@ -1853,6 +1886,13 @@ async function loadPendentes(){
 
 window.aprovarMembro=async function(uid,name,username){
   await db.collection('users').doc(uid).update({role:'member'});
+  // Garantir que doc usernames está correto
+  if(username){
+    const unSnap=await db.collection('usernames').doc(username).get();
+    if(!unSnap.exists){
+      await db.collection('usernames').doc(username).set({uid});
+    }
+  }
   showToast(`${name} aprovado! ✅`);
   loadPendentes();loadMembers();
 };
