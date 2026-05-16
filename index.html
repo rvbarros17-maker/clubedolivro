@@ -69,6 +69,13 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+#cadastro-sucesso-screen {
+  position: fixed; inset: 0;
+  background: var(--ink);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 28px; z-index: 100;
+}
 #cadastro-screen {
   position: fixed; inset: 0;
   background: var(--ink);
@@ -748,7 +755,8 @@ body {
   <div class="login-card" style="max-width:360px;width:100%">
     <h2>Cadastro</h2>
     <input id="cad-name" class="login-input" type="text" placeholder="Nome completo">
-    <input id="cad-nascimento" class="login-input" type="date" placeholder="Data de nascimento">
+    <label style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.5px;margin-bottom:4px;display:block">Data de nascimento</label>
+    <input id="cad-nascimento" class="login-input" type="date">
     <input id="cad-email" class="login-input" type="email" placeholder="Email">
     <input id="cad-telefone" class="login-input" type="tel" placeholder="Telefone (ex: 44999999999)">
     <input id="cad-username" class="login-input" type="text" placeholder="Usuário (ex: mariaalves)" autocapitalize="none">
@@ -758,6 +766,17 @@ body {
     <div style="text-align:center;margin-top:12px">
       <span style="font-size:13px;color:rgba(255,255,255,0.35);cursor:pointer" onclick="showLogin()">← Voltar ao login</span>
     </div>
+  </div>
+</div>
+
+<!-- SUCESSO CADASTRO -->
+<div id="cadastro-sucesso-screen" class="hidden">
+  <div class="login-logo">Clube<span>Leitura</span></div>
+  <div class="login-card" style="max-width:360px;width:100%;text-align:center">
+    <div style="font-size:48px;margin-bottom:16px">📬</div>
+    <h2 style="margin-bottom:12px">Solicitação enviada!</h2>
+    <p style="font-size:14px;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:24px">Sua solicitação foi enviada ao administrador. Assim que for aprovada, você poderá fazer login normalmente.</p>
+    <button class="btn btn-primary" onclick="showLogin();document.getElementById('cadastro-sucesso-screen').classList.add('hidden')">← Voltar ao login</button>
   </div>
 </div>
 
@@ -834,7 +853,10 @@ body {
       <div class="form-section">
         <div id="already-reviewed-msg" class="hidden">
           <div class="empty-state">✅ Você já avaliou este livro!</div>
-          <button class="btn btn-secondary mt-12" onclick="editReview()">✏️ Editar avaliação</button>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-secondary" onclick="editReview()">✏️ Editar</button>
+            <button class="btn btn-danger" onclick="deleteReview()" style="width:auto;padding:12px 18px">🗑️</button>
+          </div>
         </div>
         <div id="review-form">
           <div class="form-group">
@@ -866,6 +888,11 @@ body {
           <button class="btn btn-primary" onclick="submitReview()">✅ Enviar avaliação</button>
         </div>
       </div>
+      <!-- Avaliações de todos -->
+      <div style="padding:0 16px 4px 16px">
+        <div class="section-title" style="padding:16px 0 12px">⭐ Avaliações do clube</div>
+      </div>
+      <div id="all-reviews-list" style="padding:0 16px 80px"></div>
     </div>
 
     <!-- ADMIN -->
@@ -1183,13 +1210,19 @@ window.doLogin=async function(){
 };
 
 window.confirmLogout=function(){
-  if(confirm('Sair do Clube Leitura?')){
+  const opcoes=['Sair','Alterar senha','Cancelar'];
+  // Usar confirm simples - OK sai, Cancelar abre opção de senha
+  const sair=confirm('Sair do Clube Leitura?\n\nClique OK para sair ou Cancelar para ver outras opções.');
+  if(sair){
     auth.signOut().then(()=>{
       document.getElementById('app').classList.add('hidden');
       document.getElementById('login-screen').classList.remove('hidden');
       document.getElementById('login-username').value='';
       document.getElementById('login-password').value='';
     });
+  } else {
+    const alterar=confirm('Deseja alterar sua senha?');
+    if(alterar) alterarSenha();
   }
 };
 
@@ -1315,11 +1348,26 @@ function loadFullTopics(){
     if(snap.empty){el.innerHTML=`<div class="empty-state">Nenhum tópico ainda. Comece a discussão! 💬</div>`;return;}
     el.innerHTML=snap.docs.map(d=>{
       const t=d.data();
-      const replies=(t.replies||[]).map(r=>`<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(28,26,22,0.06);display:flex;gap:8px">${makeAvatar(r.authorName,24)}<div><div style="font-size:11px;font-weight:500;color:var(--ink-light);margin-bottom:3px">${r.authorName}</div><div style="font-size:13px;color:var(--ink);line-height:1.5">${r.text}</div></div></div>`).join('');
+      const isOwner=t.authorId===currentUser.uid||currentUserData.role==='admin';
+      const replies=(t.replies||[]).map((r,ri)=>{
+        const isReplyOwner=r.authorId===currentUser.uid||currentUserData.role==='admin';
+        return`<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(28,26,22,0.06);display:flex;gap:8px">
+          ${makeAvatar(r.authorName,24)}
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:500;color:var(--ink-light);margin-bottom:3px">${r.authorName}</div>
+            <div style="font-size:13px;color:var(--ink);line-height:1.5">${r.text}</div>
+            ${isReplyOwner?`<button style="font-size:10px;color:var(--burgundy);background:none;border:none;cursor:pointer;padding:0;margin-top:4px" onclick="deleteReply('${d.id}',${ri})">🗑️ excluir</button>`:''}
+          </div>
+        </div>`;
+      }).join('');
       return`<div class="full-topic-card">
-        <div class="topic-meta">${makeAvatar(t.authorName)}<span class="topic-author-name">${t.authorName}</span><span class="topic-time">${timeAgo(t.createdAt)}</span></div>
-        <div class="topic-text">${t.text}</div>${replies}
-        <button style="font-size:11px;color:var(--amber);background:none;border:none;cursor:pointer;margin-top:10px;padding:0" onclick="focusReply('${d.id}','${t.text.slice(0,30)}…')">↩ Responder</button>
+        <div class="topic-meta">${makeAvatar(t.authorName)}<span class="topic-author-name">${t.authorName}</span><span class="topic-time">${timeAgo(t.createdAt)}</span>
+          ${isOwner?`<button style="font-size:10px;color:var(--burgundy);background:none;border:none;cursor:pointer;margin-left:auto;padding:0" onclick="deleteTopic('${d.id}')">🗑️</button>`:''}
+        </div>
+        <div class="topic-text" id="topic-text-${d.id}">${t.text}</div>
+        ${isOwner?`<button style="font-size:11px;color:var(--amber);background:none;border:none;cursor:pointer;margin-top:6px;padding:0" onclick="editTopic('${d.id}','${t.text.replace(/'/g,"\'")}')">✏️ editar</button>`:''}
+        ${replies}
+        <button style="font-size:11px;color:var(--amber);background:none;border:none;cursor:pointer;margin-top:10px;padding:0;display:block" onclick="focusReply('${d.id}','${t.text.slice(0,30)}…')">↩ Responder</button>
       </div>`;
     }).join('');
   });
@@ -1409,6 +1457,7 @@ async function loadAvaliar(){
   currentReview=snap.exists?snap.data():null;
   if(currentReview){document.getElementById('already-reviewed-msg').classList.remove('hidden');document.getElementById('review-form').classList.add('hidden');}
   else{document.getElementById('already-reviewed-msg').classList.add('hidden');document.getElementById('review-form').classList.remove('hidden');}
+  loadAllReviews();
 }
 
 window.editReview=function(){
@@ -1440,6 +1489,43 @@ window.submitReview=async function(){
   currentBook.avgStars=avg;currentBook.reviewCount=all.length;
   showToast('Avaliação enviada! ⭐');loadAvaliar();renderHero('home');
 };
+
+window.deleteReview=async function(){
+  if(!currentBook||!currentReview)return;
+  if(!confirm('Excluir sua avaliação?'))return;
+  const revId=`${currentBook.id}_${currentUser.uid}`;
+  await db.collection('reviews').doc(revId).delete();
+  const revSnap=await db.collection('reviews').where('bookId','==',currentBook.id).get();
+  const all=revSnap.docs.map(d=>d.data().stars);
+  const avg=all.length?all.reduce((a,b)=>a+b,0)/all.length:0;
+  await db.collection('books').doc(currentBook.id).update({avgStars:avg,reviewCount:all.length});
+  currentBook.avgStars=avg;currentBook.reviewCount=all.length;
+  showToast('Avaliação excluída!');loadAvaliar();renderHero('home');
+};
+
+async function loadAllReviews(){
+  if(!currentBook){document.getElementById('all-reviews-list').innerHTML='';return;}
+  const snap=await db.collection('reviews').where('bookId','==',currentBook.id).get();
+  const el=document.getElementById('all-reviews-list');
+  if(snap.empty){el.innerHTML='<div class="empty-state">Nenhuma avaliação ainda.</div>';return;}
+  el.innerHTML=snap.docs.map(d=>{
+    const r=d.data();
+    const isMe=r.authorId===currentUser.uid;
+    const starsHtml=[1,2,3,4,5].map(i=>`<span class="${i<=r.stars?'review-star-f':'review-star-e'}">★</span>`).join('');
+    const chars=(r.personagens||[]).map(c=>`<span class="char-pill">${c}</span>`).join('');
+    return`<div class="review-card" style="margin-bottom:10px">
+      <div class="review-header">${makeAvatar(r.authorName,32)}
+        <div class="review-user">
+          <div class="review-user-name">${r.authorName}${isMe?' <span style="font-size:10px;color:var(--amber)">(você)</span>':''}</div>
+          <div class="review-stars">${starsHtml}</div>
+        </div>
+      </div>
+      ${r.personagens?.length?`<div class="review-field"><div class="review-field-label">Personagens</div><div class="char-pills">${chars}</div></div>`:''}
+      ${r.trecho?`<div class="review-field"><div class="review-field-label">Trecho favorito</div><div class="review-field-val" style="font-style:italic">"${r.trecho}"</div></div>`:''}
+      ${r.comentario?`<div class="review-field"><div class="review-field-label">Comentário</div><div class="review-field-val">${r.comentario}</div></div>`:''}
+    </div>`;
+  }).join('');
+}
 
 // ─── ADMIN LIVRO ───
 window.previewCover=function(e){
@@ -1635,7 +1721,8 @@ async function loadMembers(){
   const snap=await db.collection('users').get();
   const el=document.getElementById('members-list');
   if(snap.empty){el.innerHTML='<div class="empty-state">Nenhum membro.</div>';return;}
-  el.innerHTML=snap.docs.map(d=>{
+  const activeDocs=snap.docs.filter(d=>d.data().role!=='pendente');
+  el.innerHTML=activeDocs.map(d=>{
     const u=d.data();const isMe=d.id===currentUser.uid;
     return`<div class="member-row">
       ${makeAvatar(u.name||u.username,32)}
@@ -1691,8 +1778,9 @@ window.doCadastro=async function(){
     await auth.signOut();
     // Limpar form
     ['cad-name','cad-nascimento','cad-email','cad-telefone','cad-username','cad-pass'].forEach(id=>document.getElementById(id).value='');
-    showLogin();
-    showToast('Solicitação enviada! Aguarde aprovação do admin. ✅');
+    // Mostrar tela de sucesso
+    document.getElementById('cadastro-screen').classList.add('hidden');
+    document.getElementById('cadastro-sucesso-screen').classList.remove('hidden');
   }catch(e){errEl.textContent='Erro: '+e.message;errEl.style.display='block';}
 };
 
@@ -1776,6 +1864,47 @@ window.deleteMember=async function(uid,name,username){
   filaState=filaState.filter(f=>f.name!==name);
   await db.collection('config').doc('sorteio').set({fila:filaState});
   loadMembers();renderFila();showToast(`${name} removido.`);
+};
+
+// ─── TÓPICOS: editar, excluir, excluir resposta ───
+window.deleteTopic=async function(topicId){
+  if(!confirm('Excluir este tópico?'))return;
+  await db.collection('topics').doc(topicId).delete();
+  showToast('Tópico excluído.');
+};
+
+window.editTopic=function(topicId,currentText){
+  const newText=prompt('Editar tópico:',currentText);
+  if(!newText||newText===currentText)return;
+  db.collection('topics').doc(topicId).update({text:newText});
+  showToast('Tópico editado! ✅');
+};
+
+window.deleteReply=async function(topicId,replyIndex){
+  if(!confirm('Excluir esta resposta?'))return;
+  const ref=db.collection('topics').doc(topicId);
+  const snap=await ref.get();
+  const replies=snap.data().replies||[];
+  replies.splice(replyIndex,1);
+  await ref.update({replies});
+  showToast('Resposta excluída.');
+};
+
+// ─── ALTERAR SENHA ───
+window.alterarSenha=async function(){
+  const nova=prompt('Digite a nova senha (mínimo 6 caracteres):');
+  if(!nova)return;
+  if(nova.length<6){showToast('Senha muito curta!');return;}
+  try{
+    await auth.currentUser.updatePassword(nova);
+    showToast('Senha alterada com sucesso! ✅');
+  }catch(e){
+    if(e.code==='auth/requires-recent-login'){
+      showToast('Por segurança, faça logout e login novamente antes de alterar a senha.');
+    }else{
+      showToast('Erro: '+e.message);
+    }
+  }
 };
 
 // ─── NAVEGAÇÃO ───
