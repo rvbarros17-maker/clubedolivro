@@ -803,7 +803,20 @@ body {
       <button id="notif-bell" class="notification-bell hidden" onclick="goTo('admin');switchAdminTab('membros');switchMembrosTab('pendentes')">
         🔔<span id="notif-badge" class="notif-badge hidden">0</span>
       </button>
-      <div id="header-avatar" class="header-avatar" onclick="confirmLogout()"></div>
+      <div style="position:relative">
+        <div id="header-avatar" class="header-avatar" onclick="toggleAvatarMenu()"></div>
+        <div id="avatar-menu" class="hidden" style="position:absolute;right:0;top:44px;background:white;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.2);min-width:160px;overflow:hidden;z-index:200">
+          <div style="padding:8px 0">
+            <button onclick="alterarSenha();toggleAvatarMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 16px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;color:#1C1A16;text-align:left">
+              🔑 Alterar senha
+            </button>
+            <div style="height:1px;background:rgba(28,26,22,0.08);margin:0 16px"></div>
+            <button onclick="doLogout();toggleAvatarMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 16px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;color:#7A2E3C;text-align:left">
+              🚪 Sair
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1209,22 +1222,32 @@ window.doLogin=async function(){
   }catch(e){errEl.textContent='Usuário ou senha incorretos.';errEl.style.display='block';}
 };
 
-window.confirmLogout=function(){
-  const opcoes=['Sair','Alterar senha','Cancelar'];
-  // Usar confirm simples - OK sai, Cancelar abre opção de senha
-  const sair=confirm('Sair do Clube Leitura?\n\nClique OK para sair ou Cancelar para ver outras opções.');
-  if(sair){
+window.toggleAvatarMenu=function(){
+  const menu=document.getElementById('avatar-menu');
+  menu.classList.toggle('hidden');
+  setTimeout(()=>{
+    document.addEventListener('click',function closeMenu(e){
+      const m=document.getElementById('avatar-menu');
+      const av=document.getElementById('header-avatar');
+      if(m&&!m.contains(e.target)&&av&&!av.contains(e.target)){
+        m.classList.add('hidden');
+        document.removeEventListener('click',closeMenu);
+      }
+    });
+  },100);
+};
+
+window.doLogout=function(){
+  if(confirm('Sair do Clube Leitura?')){
     auth.signOut().then(()=>{
       document.getElementById('app').classList.add('hidden');
       document.getElementById('login-screen').classList.remove('hidden');
       document.getElementById('login-username').value='';
       document.getElementById('login-password').value='';
     });
-  } else {
-    const alterar=confirm('Deseja alterar sua senha?');
-    if(alterar) alterarSenha();
   }
 };
+window.confirmLogout=window.doLogout;
 
 // ─── START APP ───
 function populateYearSelects(){
@@ -1301,10 +1324,11 @@ function renderHero(target='home'){
 function loadTopics(){
   if(unsubTopics)unsubTopics();
   if(!currentBook){document.getElementById('topics-list').innerHTML=`<div class="empty-state">Registre o livro do mês para abrir as discussões.</div>`;return;}
-  unsubTopics=db.collection('topics').where('bookId','==',currentBook.id).orderBy('createdAt','desc').onSnapshot(snap=>{
+  unsubTopics=db.collection('topics').where('bookId','==',currentBook.id).onSnapshot(snap=>{
     const el=document.getElementById('topics-list');
     if(snap.empty){el.innerHTML=`<div class="empty-state" style="padding:24px 20px">Nenhum tópico ainda. Seja o primeiro! 📝</div>`;return;}
-    el.innerHTML=snap.docs.map(d=>{
+    const sortedDocs=[...snap.docs].sort((a,b)=>{const ta=a.data().createdAt?.toMillis?.()||0;const tb=b.data().createdAt?.toMillis?.()||0;return tb-ta;});
+    el.innerHTML=sortedDocs.map(d=>{
       const t=d.data();const replies=t.replies?t.replies.length:0;
       return`<div class="topic-card" onclick="openFullDisc()">
         <div class="topic-meta">${makeAvatar(t.authorName)}<span class="topic-author-name">${t.authorName}</span><span class="topic-time">${timeAgo(t.createdAt)}</span></div>
@@ -1343,10 +1367,11 @@ function loadFullTopics(){
   if(!currentBook)return;
   const replyArea=document.getElementById('disc-reply-area');replyArea.style.display='block';
   document.getElementById('reply-context').textContent=`Postar no livro: ${currentBook.titulo}`;
-  db.collection('topics').where('bookId','==',currentBook.id).orderBy('createdAt','asc').onSnapshot(snap=>{
+  db.collection('topics').where('bookId','==',currentBook.id).onSnapshot(snap=>{
     const el=document.getElementById('disc-topics');
     if(snap.empty){el.innerHTML=`<div class="empty-state">Nenhum tópico ainda. Comece a discussão! 💬</div>`;return;}
-    el.innerHTML=snap.docs.map(d=>{
+    const sortedTopics=[...snap.docs].sort((a,b)=>{const ta=a.data().createdAt?.toMillis?.()||0;const tb=b.data().createdAt?.toMillis?.()||0;return ta-tb;});
+    el.innerHTML=sortedTopics.map(d=>{
       const t=d.data();
       const isOwner=t.authorId===currentUser.uid||currentUserData.role==='admin';
       const replies=(t.replies||[]).map((r,ri)=>{
@@ -1457,7 +1482,7 @@ async function loadAvaliar(){
   currentReview=snap.exists?snap.data():null;
   if(currentReview){document.getElementById('already-reviewed-msg').classList.remove('hidden');document.getElementById('review-form').classList.add('hidden');}
   else{document.getElementById('already-reviewed-msg').classList.add('hidden');document.getElementById('review-form').classList.remove('hidden');}
-  loadAllReviews();
+  await loadAllReviews();
 }
 
 window.editReview=function(){
