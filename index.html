@@ -1184,7 +1184,7 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('setup-screen').classList.add('hidden');
     startApp();
   } else {
-    // Sempre mostra login — setup só aparece se não houver usuário no Firebase
+    if(skipAuthRedirect){skipAuthRedirect=false;return;}
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('app').classList.add('hidden');
   }
@@ -1800,6 +1800,7 @@ window.doCadastro=async function(){
       createdAt:TS()
     });
     await db.collection('usernames').doc(username).set({uid:cred.user.uid});
+    skipAuthRedirect=true;
     await auth.signOut();
     // Limpar form
     ['cad-name','cad-nascimento','cad-email','cad-telefone','cad-username','cad-pass'].forEach(id=>document.getElementById(id).value='');
