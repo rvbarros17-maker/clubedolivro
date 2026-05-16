@@ -1200,7 +1200,14 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('setup-screen').classList.add('hidden');
     startApp();
   } else {
-    if(skipAuthRedirect){skipAuthRedirect=false;return;}
+    if(skipAuthRedirect){
+      skipAuthRedirect=false;
+      return;
+    }
+    // Só redireciona se não estiver na tela de sucesso
+    if(!document.getElementById('cadastro-sucesso-screen').classList.contains('hidden')){
+      return;
+    }
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('app').classList.add('hidden');
   }
@@ -1821,26 +1828,49 @@ window.doCadastro=async function(){
   errEl.style.display='none';
   if(!name||!username||!pass||!email){errEl.textContent='Preencha todos os campos obrigatórios.';errEl.style.display='block';return;}
   if(pass.length<6){errEl.textContent='Senha mínima de 6 caracteres.';errEl.style.display='block';return;}
+
   // Checar username duplicado
-  const unSnap=await db.collection('usernames').doc(username).get();
-  if(unSnap.exists){errEl.textContent='Este usuário já está em uso.';errEl.style.display='block';return;}
-  // Salvar como pendente
+  try{
+    const unSnap=await db.collection('usernames').doc(username).get();
+    if(unSnap.exists){errEl.textContent='Este usuário já está em uso.';errEl.style.display='block';return;}
+  }catch(e){errEl.textContent='Erro ao verificar usuário.';errEl.style.display='block';return;}
+
+  // Desabilitar botão
+  const btn=document.querySelector('#cadastro-screen .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Enviando...';}
+
   try{
     const fakeEmail=`${username}@clubeleitura.app`;
+    // Pausar redirecionamento do onAuthStateChanged
+    skipAuthRedirect=true;
     const cred=await auth.createUserWithEmailAndPassword(fakeEmail,pass);
-    await db.collection('users').doc(cred.user.uid).set({
+    const uid=cred.user.uid;
+
+    // Salvar dados - usernames PRIMEIRO para garantir
+    await db.collection('usernames').doc(username).set({uid});
+    await db.collection('users').doc(uid).set({
       name,username,email,telefone,nascimento,
       role:'pendente',
       createdAt:TS()
     });
-    await db.collection('usernames').doc(username).set({uid:cred.user.uid});
-    // Limpar form e mostrar sucesso ANTES do signOut para evitar race condition
+
+    // Fazer logout em background
+    skipAuthRedirect=true;
+    auth.signOut();
+
+    // Limpar form
     ['cad-name','cad-nascimento','cad-email','cad-telefone','cad-username','cad-pass'].forEach(id=>document.getElementById(id).value='');
+
+    // Mostrar tela de sucesso
     document.getElementById('cadastro-screen').classList.add('hidden');
     document.getElementById('cadastro-sucesso-screen').classList.remove('hidden');
-    skipAuthRedirect=true;
-    auth.signOut(); // sem await - não esperar
-  }catch(e){errEl.textContent='Erro: '+e.message;errEl.style.display='block';}
+
+  }catch(e){
+    skipAuthRedirect=false;
+    errEl.textContent='Erro: '+e.message;
+    errEl.style.display='block';
+    if(btn){btn.disabled=false;btn.textContent='Enviar solicitação';}
+  }
 };
 
 window.switchMembrosTab=function(tab){
@@ -1885,13 +1915,11 @@ async function loadPendentes(){
 }
 
 window.aprovarMembro=async function(uid,name,username){
+  // Atualizar role
   await db.collection('users').doc(uid).update({role:'member'});
-  // Garantir que doc usernames está correto
+  // Sempre recriar/confirmar usernames doc
   if(username){
-    const unSnap=await db.collection('usernames').doc(username).get();
-    if(!unSnap.exists){
-      await db.collection('usernames').doc(username).set({uid});
-    }
+    await db.collection('usernames').doc(username).set({uid});
   }
   showToast(`${name} aprovado! ✅`);
   loadPendentes();loadMembers();
