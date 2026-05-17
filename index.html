@@ -1403,6 +1403,8 @@ function loadFullTopics(){
     const el=document.getElementById('disc-topics');
     if(snap.empty){el.innerHTML=`<div class="empty-state">Nenhum tópico ainda. Comece a discussão! 💬</div>`;return;}
     const sortedTopics=[...snap.docs].sort((a,b)=>{const ta=a.data().createdAt?.toMillis?.()||0;const tb=b.data().createdAt?.toMillis?.()||0;return ta-tb;});
+    window._topicsMap={};
+    sortedTopics.forEach(d=>{window._topicsMap[d.id]=d.data();});
     el.innerHTML=sortedTopics.map(d=>{
       const t=d.data();
       const isOwner=t.authorId===currentUser.uid||currentUserData.role==='admin';
@@ -1413,25 +1415,40 @@ function loadFullTopics(){
           <div style="flex:1">
             <div style="font-size:11px;font-weight:500;color:var(--ink-light);margin-bottom:3px">${r.authorName}</div>
             <div style="font-size:13px;color:var(--ink);line-height:1.5">${r.text}</div>
-            ${isReplyOwner?`<button style="font-size:10px;color:var(--burgundy);background:none;border:none;cursor:pointer;padding:0;margin-top:4px" onclick="deleteReply('${d.id}',${ri})">🗑️ excluir</button>`:''}
+            ${isReplyOwner?`<button style="font-size:10px;color:var(--burgundy);background:none;border:none;cursor:pointer;padding:0;margin-top:4px" data-action="del-reply" data-id="${d.id}" data-ri="${ri}">🗑️ excluir</button>`:''}
           </div>
         </div>`;
       }).join('');
       return`<div class="full-topic-card">
         <div class="topic-meta">${makeAvatar(t.authorName)}<span class="topic-author-name">${t.authorName}</span><span class="topic-time">${timeAgo(t.createdAt)}</span>
-          ${isOwner?`<button style="font-size:10px;color:var(--burgundy);background:none;border:none;cursor:pointer;margin-left:auto;padding:0" onclick="deleteTopic('${d.id}')">🗑️</button>`:''}
+          ${isOwner?`<button style="font-size:10px;color:var(--burgundy);background:none;border:none;cursor:pointer;margin-left:auto;padding:0" data-action="del-topic" data-id="${d.id}">🗑️</button>`:''}
         </div>
-        <div class="topic-text" id="topic-text-${d.id}">${t.text}</div>
-        ${isOwner?`<button style="font-size:11px;color:var(--amber);background:none;border:none;cursor:pointer;margin-top:6px;padding:0" onclick="editTopic('${d.id}','${t.text.replace(/'/g,"\'")}')">✏️ editar</button>`:''}
+        <div class="topic-text">${t.text}</div>
+        ${isOwner?`<button style="font-size:11px;color:var(--amber);background:none;border:none;cursor:pointer;margin-top:6px;padding:0" data-action="edit-topic" data-id="${d.id}">✏️ editar</button>`:''}
         ${replies}
-        <button style="font-size:11px;color:var(--amber);background:none;border:none;cursor:pointer;margin-top:10px;padding:0;display:block" onclick="focusReply('${d.id}','${t.text.slice(0,30)}…')">↩ Responder</button>
+        <button style="font-size:11px;color:var(--amber);background:none;border:none;cursor:pointer;margin-top:10px;padding:0;display:block" data-action="reply" data-id="${d.id}" data-preview="${t.text.slice(0,30)}">↩ Responder</button>
       </div>`;
     }).join('');
-  });
+  ;
 }
 
 let replyTargetId=null;
 window.focusReply=function(topicId,preview){replyTargetId=topicId;document.getElementById('reply-context').textContent=`Respondendo: "${preview}"`;document.getElementById('reply-input').focus();};
+
+// Event delegation para botões de tópico (evita problema com onclick em strings)
+document.addEventListener('click', function(e){
+  const btn=e.target.closest('[data-action]');
+  if(!btn)return;
+  const action=btn.dataset.action;
+  const id=btn.dataset.id;
+  if(action==='del-topic') deleteTopic(id);
+  else if(action==='edit-topic'){
+    const t=window._topicsMap&&window._topicsMap[id];
+    if(t) editTopic(id, t.text);
+  }
+  else if(action==='del-reply') deleteReply(id, parseInt(btn.dataset.ri));
+  else if(action==='reply') focusReply(id, btn.dataset.preview+'…');
+});
 
 window.postTopic=async function(){
   const text=document.getElementById('reply-input').value.trim();
