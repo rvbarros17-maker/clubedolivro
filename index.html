@@ -1132,6 +1132,16 @@ body {
   </div>
 </div>
 
+<!-- MODAL: Alterar Senha -->
+<div class="modal-overlay" id="modal-senha" onclick="closeModal('modal-senha')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔑 Alterar senha</div>
+    <input type="password" id="nova-senha-input" class="form-input" placeholder="Nova senha (mínimo 6 caracteres)" style="margin-bottom:12px">
+    <button class="btn btn-primary" onclick="confirmarAlterarSenha()">Salvar nova senha</button>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -1184,12 +1194,17 @@ auth.onAuthStateChanged(async user => {
   const loadingEl = document.getElementById('loading-screen');
   loadingEl.style.opacity='0';
   setTimeout(()=>loadingEl.classList.add('hidden'),400);
+  // Ignorar completamente se estiver no fluxo de cadastro
+  if(isCadastroFlow) return;
+
   if(user){
     currentUser=user;
     const snap=await db.collection('users').doc(user.uid).get();
     currentUserData=snap.exists?snap.data():{name:user.email,role:'member'};
     if(currentUserData.role==='pendente'){
+      isCadastroFlow=true;
       await auth.signOut();
+      isCadastroFlow=false;
       document.getElementById('login-error').textContent='Sua solicitação ainda está aguardando aprovação do administrador.';
       document.getElementById('login-error').style.display='block';
       document.getElementById('login-screen').classList.remove('hidden');
@@ -1200,14 +1215,8 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('setup-screen').classList.add('hidden');
     startApp();
   } else {
-    if(skipAuthRedirect){
-      skipAuthRedirect=false;
-      return;
-    }
-    // Só redireciona se não estiver na tela de sucesso
-    if(!document.getElementById('cadastro-sucesso-screen').classList.contains('hidden')){
-      return;
-    }
+    if(skipAuthRedirect){ skipAuthRedirect=false; return; }
+    if(!document.getElementById('cadastro-sucesso-screen').classList.contains('hidden')) return;
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('app').classList.add('hidden');
   }
@@ -1829,24 +1838,27 @@ window.doCadastro=async function(){
   if(!name||!username||!pass||!email){errEl.textContent='Preencha todos os campos obrigatórios.';errEl.style.display='block';return;}
   if(pass.length<6){errEl.textContent='Senha mínima de 6 caracteres.';errEl.style.display='block';return;}
 
-  // Checar username duplicado
-  try{
-    const unSnap=await db.collection('usernames').doc(username).get();
-    if(unSnap.exists){errEl.textContent='Este usuário já está em uso.';errEl.style.display='block';return;}
-  }catch(e){errEl.textContent='Erro ao verificar usuário.';errEl.style.display='block';return;}
-
-  // Desabilitar botão
   const btn=document.querySelector('#cadastro-screen .btn-primary');
   if(btn){btn.disabled=true;btn.textContent='Enviando...';}
 
   try{
+    // Checar username duplicado
+    const unSnap=await db.collection('usernames').doc(username).get();
+    if(unSnap.exists){
+      errEl.textContent='Este usuário já está em uso.';
+      errEl.style.display='block';
+      if(btn){btn.disabled=false;btn.textContent='Enviar solicitação';}
+      return;
+    }
+
     const fakeEmail=`${username}@clubeleitura.app`;
-    // Pausar redirecionamento do onAuthStateChanged
-    skipAuthRedirect=true;
+
+    // Ativar flag - bloqueia TODO o onAuthStateChanged durante o cadastro
+    isCadastroFlow=true;
+
     const cred=await auth.createUserWithEmailAndPassword(fakeEmail,pass);
     const uid=cred.user.uid;
 
-    // Salvar dados - usernames PRIMEIRO para garantir
     await db.collection('usernames').doc(username).set({uid});
     await db.collection('users').doc(uid).set({
       name,username,email,telefone,nascimento,
@@ -1854,19 +1866,21 @@ window.doCadastro=async function(){
       createdAt:TS()
     });
 
-    // Fazer logout em background
-    skipAuthRedirect=true;
-    auth.signOut();
+    await auth.signOut();
+
+    // Desativar flag DEPOIS do signOut
+    isCadastroFlow=false;
 
     // Limpar form
     ['cad-name','cad-nascimento','cad-email','cad-telefone','cad-username','cad-pass'].forEach(id=>document.getElementById(id).value='');
+    if(btn){btn.disabled=false;btn.textContent='Enviar solicitação';}
 
     // Mostrar tela de sucesso
     document.getElementById('cadastro-screen').classList.add('hidden');
     document.getElementById('cadastro-sucesso-screen').classList.remove('hidden');
 
   }catch(e){
-    skipAuthRedirect=false;
+    isCadastroFlow=false;
     errEl.textContent='Erro: '+e.message;
     errEl.style.display='block';
     if(btn){btn.disabled=false;btn.textContent='Enviar solicitação';}
@@ -1915,14 +1929,17 @@ async function loadPendentes(){
 }
 
 window.aprovarMembro=async function(uid,name,username){
-  // Atualizar role
-  await db.collection('users').doc(uid).update({role:'member'});
-  // Sempre recriar/confirmar usernames doc
-  if(username){
+  try{
+    // 1. Atualizar role no users
+    await db.collection('users').doc(uid).update({role:'member'});
+    // 2. Garantir que usernames aponta para o uid correto
     await db.collection('usernames').doc(username).set({uid});
+    showToast(`${name} aprovado! ✅`);
+    loadPendentes();loadMembers();
+  }catch(e){
+    showToast('Erro ao aprovar: '+e.message);
+    console.error(e);
   }
-  showToast(`${name} aprovado! ✅`);
-  loadPendentes();loadMembers();
 };
 
 window.rejeitarMembro=async function(uid,name,username){
@@ -1985,16 +2002,27 @@ window.deleteReply=async function(topicId,replyIndex){
 };
 
 // ─── ALTERAR SENHA ───
-window.alterarSenha=async function(){
-  const nova=prompt('Digite a nova senha (mínimo 6 caracteres):');
-  if(!nova)return;
-  if(nova.length<6){showToast('Senha muito curta!');return;}
+window.alterarSenha=function(){
+  // Fechar menu
+  const menu=document.getElementById('avatar-menu');
+  if(menu)menu.classList.add('hidden');
+  // Mostrar modal de senha
+  document.getElementById('modal-senha').classList.add('open');
+  document.getElementById('nova-senha-input').value='';
+  document.getElementById('nova-senha-input').focus();
+};
+
+window.confirmarAlterarSenha=async function(){
+  const nova=document.getElementById('nova-senha-input').value;
+  if(!nova||nova.length<6){showToast('Senha mínima de 6 caracteres!');return;}
   try{
     await auth.currentUser.updatePassword(nova);
+    closeModal('modal-senha');
     showToast('Senha alterada com sucesso! ✅');
   }catch(e){
     if(e.code==='auth/requires-recent-login'){
-      showToast('Por segurança, faça logout e login novamente antes de alterar a senha.');
+      closeModal('modal-senha');
+      showToast('Faça logout e login novamente antes de alterar a senha.');
     }else{
       showToast('Erro: '+e.message);
     }
@@ -2031,5 +2059,6 @@ window.showToast=function(msg){const t=document.getElementById('toast');t.textCo
     });
   }
 </script>
+	<script type="module" src="/app.js"></script>
 </body>
 </html>
