@@ -510,44 +510,55 @@
   .reply-box textarea:focus { border-color: var(--accent); }
 
   /* ACERVO */
-  .acervo-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+  .acervo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     padding: 16px;
   }
 
   .acervo-item {
     cursor: pointer;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
+    border-radius: var(--radius);
     background: var(--card);
     border: 1px solid var(--border);
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
   }
-  .acervo-item:hover { border-color: rgba(192,132,252,0.3); transform: translateY(-2px); }
+  .acervo-item:hover { border-color: rgba(192,132,252,0.3); transform: translateX(3px); }
 
   .acervo-cover {
-    width: 100%;
-    aspect-ratio: 2/3;
+    width: 54px;
+    height: 80px;
     object-fit: cover;
+    border-radius: 5px;
     display: block;
+    flex-shrink: 0;
+    box-shadow: 3px 4px 12px rgba(0,0,0,0.5);
   }
 
   .acervo-cover-ph {
-    width: 100%;
-    aspect-ratio: 2/3;
-    background: linear-gradient(135deg, var(--card), var(--card2));
+    width: 54px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--card2), #3b2070);
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
+    font-size: 22px;
+    flex-shrink: 0;
   }
 
-  .acervo-info { padding: 8px; }
-  .acervo-month { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-  .acervo-title { font-size: 12px; font-weight: 600; line-height: 1.3; margin: 2px 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .acervo-stars { font-size: 11px; color: var(--gold); margin-top: 2px; }
+  .acervo-info { flex: 1; min-width: 0; }
+  .acervo-month { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 3px; }
+  .acervo-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; line-height: 1.3; margin-bottom: 2px; }
+  .acervo-author { font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+  .acervo-footer { display: flex; align-items: center; gap: 8px; }
+  .acervo-stars { font-size: 12px; color: var(--gold); }
+  .acervo-count { font-size: 11px; color: var(--muted); }
 
   /* BOOK DETAIL MODAL */
   .modal-overlay {
@@ -1007,7 +1018,7 @@
       <div class="section-header" style="padding:16px 16px 0">
         <div class="section-title">📖 Acervo</div>
       </div>
-      <div class="acervo-grid" id="acervo-grid">
+      <div class="acervo-list" id="acervo-grid">
         <div class="loading-spinner" style="grid-column:1/-1"><div class="spinner"></div></div>
       </div>
     </div>
@@ -1766,7 +1777,7 @@ window.submitTopic = async function() {
 // ===== ACERVO =====
 async function loadAcervo() {
   const grid = document.getElementById('acervo-grid');
-  grid.innerHTML = `<div class="loading-spinner" style="grid-column:1/-1"><div class="spinner"></div></div>`;
+  grid.innerHTML = `<div class="loading-spinner"><div class="spinner"></div></div>`;
 
   const snap = await getDocs(collection(db, 'books'));
   const books = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.id.localeCompare(a.id));
@@ -1787,13 +1798,18 @@ async function loadAcervo() {
   grid.innerHTML = booksWithRatings.map(b => `
     <div class="acervo-item" onclick="openBookDetail('${b.id}')">
       ${b.cover
-        ? `<img class="acervo-cover" src="${b.cover}" alt="${b.title}" onerror="this.parentElement.querySelector('.acervo-cover').style.display='none'">`
+        ? `<img class="acervo-cover" src="${b.cover}" alt="${b.title}">`
         : `<div class="acervo-cover-ph">📕</div>`}
       <div class="acervo-info">
         <div class="acervo-month">${monthLabel(b.id)}</div>
         <div class="acervo-title">${b.title}</div>
-        ${b.avgStars ? `<div class="acervo-stars">★ ${b.avgStars}</div>` : ''}
+        <div class="acervo-author">${b.author}</div>
+        <div class="acervo-footer">
+          ${b.avgStars ? `<span class="acervo-stars">★ ${b.avgStars}</span><span class="acervo-count">(${b.ratingCount})</span>` : `<span class="acervo-count">Sem avaliações</span>`}
+          ${(b.genres||[]).slice(0,1).map(g=>`<span class="badge-genre" style="font-size:9px;padding:2px 6px">${g}</span>`).join('')}
+        </div>
       </div>
+      <div style="color:var(--muted);font-size:18px;flex-shrink:0">›</div>
     </div>`).join('');
 }
 
