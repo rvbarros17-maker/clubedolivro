@@ -1226,7 +1226,7 @@
 
 <!-- FIREBASE + APP SCRIPTS -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, query, where, orderBy, onSnapshot, getDocs, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -1970,10 +1970,8 @@ async function loadAdminBook() {
     document.getElementById('adm-autor').value = '';
     document.getElementById('adm-capa-url').value = '';
     document.getElementById('adm-capa-preview').style.display = 'none';
-    document.querySelectorAll('#genre-checkboxes .genre-cb').forEach(el=>{
-      el.classList.remove('checked');
-      el.querySelector('input').checked = false;
-    });
+    document.getElementById('adm-escolhido').value = '';
+    document.querySelectorAll('#genre-checkboxes .genre-cb').forEach(el => el.classList.remove('checked'));
     adminBookEditId = null;
     section.innerHTML = '';
     return;
@@ -2080,14 +2078,25 @@ window.createMember = async function() {
 
   try {
     const email = `${username}@clubeleitura.app`;
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    await setDoc(doc(db,'members',cred.user.uid), {
+
+    // Cria um segundo app Firebase temporário para não derrubar a sessão do admin
+    const secondaryApp = initializeApp(firebaseConfig, `secondary-${Date.now()}`);
+    const secondaryAuth = getAuth(secondaryApp);
+
+    const cred = await createUserWithEmailAndPassword(secondaryAuth, email, pass);
+    const newUid = cred.user.uid;
+
+    // Desloga do app secundário e descarta
+    await signOut(secondaryAuth);
+    await deleteApp(secondaryApp);
+
+    // Salva no Firestore (sessão do admin continua intacta)
+    await setDoc(doc(db, 'members', newUid), {
       name, username, email, isAdmin,
       createdAt: serverTimestamp()
     });
-    // Sign back in as current admin (Firebase auto-signs in the new user)
-    // This is a known limitation — in production use Admin SDK
-    showToast(`Membro @${username} criado! Faça login novamente se necessário.`,'success');
+
+    showToast(`Membro @${username} criado!`, 'success');
     document.getElementById('new-member-name').value = '';
     document.getElementById('new-member-user').value = '';
     document.getElementById('new-member-pass').value = '';
@@ -2095,7 +2104,7 @@ window.createMember = async function() {
     loadMembersList();
   } catch(e) {
     if (e.code === 'auth/email-already-in-use') showToast('Username já existe.','error');
-    else showToast('Erro ao criar membro.','error');
+    else showToast('Erro ao criar membro: ' + e.message,'error');
     console.log(e);
   }
 };
