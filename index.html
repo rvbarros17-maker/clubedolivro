@@ -698,12 +698,25 @@
     cursor: pointer;
     font-size: 12px;
     transition: all 0.2s;
+    user-select: none;
+    -webkit-user-select: none;
   }
-  .genre-cb input { display: none; }
   .genre-cb.checked {
     background: rgba(192,132,252,0.15);
     border-color: var(--accent);
     color: var(--accent2);
+  }
+  .genre-cb .cb-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1.5px solid var(--muted);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .genre-cb.checked .cb-dot {
+    background: var(--accent);
+    border-color: var(--accent);
   }
 
   .member-row {
@@ -1057,15 +1070,10 @@
           </select>
         </div>
         <div class="form-field">
-          <label>Capa do livro</label>
-          <div class="upload-area" onclick="document.getElementById('adm-capa-input').click()">
-            <span style="font-size:24px">📷</span>
-            <p style="font-size:13px;color:var(--muted);margin-top:8px">Toque para selecionar imagem</p>
-            <input type="file" id="adm-capa-input" accept="image/*" onchange="previewCover(event)">
-            <img id="adm-capa-preview" class="upload-preview" style="display:none">
-          </div>
-          <p style="font-size:11px;color:var(--muted);margin-top:6px">Ou cole URL da imagem:</p>
-          <input type="url" id="adm-capa-url" placeholder="https://..." style="margin-top:6px;padding:8px 12px;font-size:13px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);width:100%;outline:none">
+          <label>URL da capa</label>
+          <input type="url" id="adm-capa-url" placeholder="https://...">
+          <p style="font-size:11px;color:var(--muted);margin-top:5px">Cole a URL da imagem da capa (ex: do Google Books ou Open Library)</p>
+          <img id="adm-capa-preview" style="width:80px;height:118px;object-fit:cover;border-radius:6px;margin-top:8px;display:none">
         </div>
         <div style="display:flex;gap:10px">
           <button class="btn btn-primary" style="flex:1" onclick="saveBook()">Salvar Livro</button>
@@ -1221,7 +1229,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, query, where, orderBy, onSnapshot, getDocs, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCMdW9OiJ3NhdepnznfV4F1hpBoByu9_Zs",
@@ -1236,8 +1243,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
-
 const GENRES = ['Romance','Fantasia','Suspense','Policial','Ficção Científica','Autoajuda','Biografia','Comédia Romântica','Comédia','Literatura Brasileira'];
 
 // STATE
@@ -1250,7 +1255,6 @@ let currentTopicId = null;
 let currentReplies = [];
 let unsubTopics = null;
 let unsubReplies = null;
-let coverBase64 = null;
 let adminBookEditId = null;
 let sortFila = [];
 
@@ -1367,6 +1371,19 @@ function showApp() {
 
   // Init genre checkboxes
   initGenreCheckboxes();
+
+  // Preview capa ao digitar URL
+  setTimeout(() => {
+    const urlInput = document.getElementById('adm-capa-url');
+    if (urlInput) {
+      urlInput.addEventListener('input', () => {
+        const prev = document.getElementById('adm-capa-preview');
+        const url = urlInput.value.trim();
+        if (url) { prev.src = url; prev.style.display = 'block'; prev.onerror = ()=>prev.style.display='none'; }
+        else prev.style.display = 'none';
+      });
+    }
+  }, 500);
 
   // Load home
   navTo('home');
@@ -1919,18 +1936,17 @@ function initGenreCheckboxes() {
   const container = document.getElementById('genre-checkboxes');
   if (!container) return;
   container.innerHTML = GENRES.map(g=>`
-    <label class="genre-cb" onclick="toggleGenre(this)">
-      <input type="checkbox" value="${g}">${g}
-    </label>`).join('');
+    <div class="genre-cb" data-genre="${g}" onclick="toggleGenre(this)">
+      <div class="cb-dot"></div>${g}
+    </div>`).join('');
 }
 
 window.toggleGenre = function(el) {
   el.classList.toggle('checked');
-  el.querySelector('input').checked = el.classList.contains('checked');
 };
 
 function getSelectedGenres() {
-  return Array.from(document.querySelectorAll('#genre-checkboxes input:checked')).map(i=>i.value);
+  return Array.from(document.querySelectorAll('#genre-checkboxes .genre-cb.checked')).map(el => el.dataset.genre);
 }
 
 async function loadAdminMembersSelect() {
@@ -1976,11 +1992,9 @@ async function loadAdminBook() {
   }
 
   // Set genres
-  document.querySelectorAll('#genre-checkboxes .genre-cb').forEach(el=>{
-    const val = el.querySelector('input').value;
-    const checked = (book.genres||[]).includes(val);
-    el.classList.toggle('checked', checked);
-    el.querySelector('input').checked = checked;
+  document.querySelectorAll('#genre-checkboxes .genre-cb').forEach(el => {
+    const val = el.dataset.genre;
+    el.classList.toggle('checked', (book.genres||[]).includes(val));
   });
 
   // Set chosen by
@@ -1998,19 +2012,9 @@ window.saveBook = async function() {
   const autor = document.getElementById('adm-autor').value.trim();
   const generos = getSelectedGenres();
   const escolhido = document.getElementById('adm-escolhido').value;
-  let cover = document.getElementById('adm-capa-url').value.trim();
+  const cover = document.getElementById('adm-capa-url').value.trim();
 
   if (!mes || !titulo || !autor) { showToast('Preencha mês, título e autor.','error'); return; }
-
-  // If there's a file upload
-  if (coverBase64) {
-    try {
-      const storageRef = ref(storage, `covers/${mes}.jpg`);
-      const blob = await fetch(coverBase64).then(r=>r.blob());
-      await uploadBytes(storageRef, blob);
-      cover = await getDownloadURL(storageRef);
-    } catch(e) { console.log('Upload error:', e); }
-  }
 
   const data = {
     title: titulo,
@@ -2027,20 +2031,7 @@ window.saveBook = async function() {
     currentMonth = mes;
     showToast('Livro salvo!','success');
     loadAdminBook();
-  } catch(e) { showToast('Erro ao salvar.','error'); console.log(e); }
-};
-
-window.previewCover = function(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    coverBase64 = e.target.result;
-    const prev = document.getElementById('adm-capa-preview');
-    prev.src = coverBase64;
-    prev.style.display = 'block';
-  };
-  reader.readAsDataURL(file);
+  } catch(e) { showToast('Erro ao salvar: ' + e.message,'error'); console.log(e); }
 };
 
 window.switchAdminTab = function(tab) {
