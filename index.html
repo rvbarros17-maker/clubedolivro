@@ -1422,6 +1422,15 @@ function showApp() {
         else prev.style.display = 'none';
       });
     }
+
+    // Recarregar form ao mudar o mês
+    const mesInput = document.getElementById('adm-mes');
+    if (mesInput) {
+      mesInput.addEventListener('change', () => {
+        currentMonth = mesInput.value;
+        loadAdminBook();
+      });
+    }
   }, 500);
 
   // Load home
