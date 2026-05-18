@@ -1174,6 +1174,7 @@
         <div class="pm-role" id="pm-role"></div>
       </div>
     </div>
+    <button class="btn btn-secondary" style="width:100%;margin-bottom:10px" onclick="openChangePassword()">🔑 Alterar senha</button>
     <button class="btn btn-danger" style="width:100%" onclick="doLogout()">Sair</button>
   </div>
 </div>
@@ -1209,6 +1210,33 @@
   </div>
 </div>
 
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="modal-change-pass" onclick="closeChangePassword(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">🔑 Alterar Senha</div>
+      <button class="btn btn-ghost" onclick="closeChangePasswordBtn()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-field">
+        <label>Senha atual</label>
+        <input type="password" id="cp-current" placeholder="••••••••">
+      </div>
+      <div class="form-field">
+        <label>Nova senha</label>
+        <input type="password" id="cp-new" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div class="form-field">
+        <label>Confirmar nova senha</label>
+        <input type="password" id="cp-confirm" placeholder="Repita a nova senha">
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="submitChangePassword()">Salvar nova senha</button>
+      <div id="cp-error" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:8px;font-size:13px;color:var(--danger)"></div>
+    </div>
+  </div>
+</div>
+
 <!-- CONFIRM DIALOG -->
 <div class="confirm-dialog" id="confirm-dialog">
   <div class="confirm-box">
@@ -1227,7 +1255,7 @@
 <!-- FIREBASE + APP SCRIPTS -->
 <script type="module">
 import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, query, where, orderBy, onSnapshot, getDocs, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -1405,6 +1433,64 @@ window.openProfileMenu = function() {
 window.closeProfileMenu = function(e) {
   if (!e || e.target === document.getElementById('profile-menu'))
     document.getElementById('profile-menu').classList.remove('active');
+};
+
+window.openChangePassword = function() {
+  document.getElementById('profile-menu').classList.remove('active');
+  document.getElementById('cp-current').value = '';
+  document.getElementById('cp-new').value = '';
+  document.getElementById('cp-confirm').value = '';
+  document.getElementById('cp-error').style.display = 'none';
+  document.getElementById('modal-change-pass').classList.add('active');
+};
+
+window.closeChangePassword = function(e) {
+  if (e.target === document.getElementById('modal-change-pass'))
+    document.getElementById('modal-change-pass').classList.remove('active');
+};
+
+window.closeChangePasswordBtn = function() {
+  document.getElementById('modal-change-pass').classList.remove('active');
+};
+
+window.submitChangePassword = async function() {
+  const current = document.getElementById('cp-current').value;
+  const newPass = document.getElementById('cp-new').value;
+  const confirm = document.getElementById('cp-confirm').value;
+  const errEl = document.getElementById('cp-error');
+  errEl.style.display = 'none';
+
+  if (!current || !newPass || !confirm) {
+    errEl.textContent = 'Preencha todos os campos.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (newPass.length < 6) {
+    errEl.textContent = 'A nova senha deve ter pelo menos 6 caracteres.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (newPass !== confirm) {
+    errEl.textContent = 'As senhas não coincidem.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    // Reautenticar antes de trocar a senha
+    const credential = EmailAuthProvider.credential(currentUser.email, current);
+    await reauthenticateWithCredential(currentUser, credential);
+    await updatePassword(currentUser, newPass);
+    document.getElementById('modal-change-pass').classList.remove('active');
+    showToast('Senha alterada com sucesso!', 'success');
+  } catch(e) {
+    if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+      errEl.textContent = 'Senha atual incorreta.';
+    } else {
+      errEl.textContent = 'Erro ao alterar senha. Tente novamente.';
+    }
+    errEl.style.display = 'block';
+  }
 };
 
 // ===== NAV =====
