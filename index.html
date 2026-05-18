@@ -2,1154 +2,1226 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="theme-color" content="#1C1A16">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leitores Fofoqueiros</title>
+<meta name="theme-color" content="#1a0a2e">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Clube Leitura">
-<title>Clube Leitura</title>
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/icon-192.png">
-<meta name="mobile-web-app-capable" content="yes">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --cream: #F5F0E8;
-  --paper: #EDE7D9;
-  --paper2: #E5DDD0;
-  --ink: #1C1A16;
-  --ink-light: #4A4640;
-  --ink-faint: rgba(28,26,22,0.35);
-  --amber: #C8852A;
-  --amber-light: #E8A84A;
-  --amber-bg: rgba(200,133,42,0.12);
-  --burgundy: #7A2E3C;
-  --sage: #5C7A5E;
-  --white: #FFFFFF;
-  --shadow-sm: 0 2px 8px rgba(28,26,22,0.08);
-  --shadow-md: 0 4px 20px rgba(28,26,22,0.12);
-  --shadow-lg: 0 8px 40px rgba(28,26,22,0.18);
-  --radius: 14px;
-  --radius-sm: 8px;
-}
+  :root {
+    --bg: #0f0720;
+    --surface: #1a0f35;
+    --card: #221545;
+    --card2: #2a1955;
+    --border: rgba(180,140,255,0.12);
+    --accent: #c084fc;
+    --accent2: #f0abfc;
+    --gold: #fbbf24;
+    --gold2: #fde68a;
+    --text: #f3e8ff;
+    --muted: #a78bca;
+    --danger: #f87171;
+    --success: #4ade80;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.45);
+    --glow: 0 0 20px rgba(192,132,252,0.3);
+  }
 
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--ink);
-  color: var(--ink);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-/* ─── LOADING ─── */
-#loading-screen {
-  position: fixed; inset: 0;
-  background: var(--ink);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  z-index: 9999;
-  transition: opacity 0.4s;
-}
-#loading-screen .logo-load {
-  font-family: 'Playfair Display', serif;
-  font-size: 32px; color: var(--amber-light);
-  margin-bottom: 8px;
-}
-#loading-screen .logo-load span { font-style: italic; color: white; }
-#loading-screen .spinner {
-  width: 32px; height: 32px;
-  border: 2px solid rgba(255,255,255,0.1);
-  border-top-color: var(--amber);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin-top: 24px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+  /* BG texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(192,132,252,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(240,171,252,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-#cadastro-sucesso-screen {
-  position: fixed; inset: 0;
-  background: var(--ink);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 32px 28px; z-index: 100;
-}
-#cadastro-screen {
-  position: fixed; inset: 0;
-  background: var(--ink);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 32px 28px; z-index: 100;
-  overflow-y: auto;
-}
-.notification-bell {
-  position: relative; cursor: pointer;
-  background: rgba(255,255,255,0.08);
-  border: none; width: 36px; height: 36px;
-  border-radius: 50%; display: flex;
-  align-items: center; justify-content: center;
-  font-size: 16px;
-}
-.notif-badge {
-  position: absolute; top: -4px; right: -4px;
-  background: var(--burgundy); color: white;
-  font-size: 10px; font-weight: 700;
-  width: 18px; height: 18px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  border: 2px solid var(--ink);
-}
-.pendente-card {
-  background: white; border-radius: var(--radius);
-  padding: 14px 16px; margin-bottom: 10px;
-  box-shadow: var(--shadow-sm);
-}
-.pendente-info { margin-bottom: 10px; }
-.pendente-name { font-size: 14px; font-weight: 600; color: var(--ink); }
-.pendente-detail { font-size: 12px; color: var(--ink-faint); margin-top: 2px; }
-.pendente-actions { display: flex; gap: 8px; }
-#setup-screen {
-  position: fixed; inset: 0;
-  background: var(--ink);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 32px 28px;
-  z-index: 100;
-}
+  /* ===== AUTH ===== */
+  #auth-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+  }
 
-#app {
-  max-width: 480px;
-  margin: 0 auto;
-  min-height: 100vh;
-  background: var(--cream);
-  position: relative;
-  display: flex; flex-direction: column;
-}
+  .auth-logo {
+    text-align: center;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s ease both;
+  }
 
-/* ─── LOGIN ─── */
-#login-screen {
-  position: fixed; inset: 0;
-  background: var(--ink);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 32px 28px;
-  z-index: 100;
-}
-.login-logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 38px; color: var(--amber-light);
-  margin-bottom: 4px; text-align: center;
-}
-.login-logo span { font-style: italic; color: white; }
-.login-tagline {
-  font-size: 13px; color: rgba(255,255,255,0.35);
-  margin-bottom: 48px; text-align: center;
-  letter-spacing: 0.5px;
-}
-.login-card {
-  width: 100%; max-width: 360px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px;
-  padding: 28px;
-}
-.login-card h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 22px; color: white;
-  margin-bottom: 24px;
-}
-.login-input {
-  width: 100%;
-  background: rgba(255,255,255,0.06);
-  border: 1.5px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
-  padding: 13px 16px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px; color: white;
-  margin-bottom: 12px;
-  transition: border-color 0.2s;
-}
-.login-input::placeholder { color: rgba(255,255,255,0.25); }
-.login-input:focus { outline: none; border-color: var(--amber); }
-.login-error {
-  font-size: 12px; color: #E57373;
-  margin-bottom: 12px; display: none;
-}
+  .auth-logo .icon {
+    font-size: 52px;
+    display: block;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 0 16px rgba(192,132,252,0.5));
+  }
 
-/* ─── HEADER ─── */
-.app-header {
-  background: var(--ink);
-  padding: 48px 20px 16px;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-shrink: 0;
-}
-.header-logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 22px; color: var(--amber-light);
-}
-.header-logo span { font-style: italic; color: white; }
-.header-right { display: flex; align-items: center; gap: 10px; }
-.admin-pill {
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 1px; text-transform: uppercase;
-  background: var(--amber-bg);
-  color: var(--amber-light);
-  border: 1px solid rgba(200,133,42,0.3);
-  padding: 3px 10px; border-radius: 20px;
-}
-.header-avatar {
-  width: 34px; height: 34px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 600; color: white;
-  flex-shrink: 0; cursor: pointer;
-}
+  .auth-logo h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    font-style: italic;
+    background: linear-gradient(135deg, var(--accent2), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
 
-/* ─── CONTENT ─── */
-.content {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 80px;
-  -webkit-overflow-scrolling: touch;
-}
+  .auth-logo p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
 
-/* ─── BOTTOM NAV ─── */
-.bottom-nav {
-  position: fixed;
-  bottom: 0; left: 50%;
-  transform: translateX(-50%);
-  width: 100%; max-width: 480px;
-  background: var(--ink);
-  padding: 10px 0 24px;
-  display: flex; justify-content: space-around;
-  z-index: 50;
-  border-top: 1px solid rgba(255,255,255,0.05);
-}
-.nav-btn {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 3px;
-  background: none; border: none;
-  cursor: pointer; padding: 4px 12px;
-  color: rgba(255,255,255,0.3);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 10px; letter-spacing: 0.3px;
-  transition: color 0.2s;
-}
-.nav-btn.active { color: var(--amber-light); }
-.nav-btn .nav-icon { font-size: 22px; }
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: var(--shadow);
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
 
-/* ─── SCREENS ─── */
-.screen { display: none; }
-.screen.active { display: block; }
+  .auth-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    margin-bottom: 24px;
+    color: var(--accent2);
+  }
 
-/* ─── HOME ─── */
-.hero-section {
-  background: var(--ink);
-  padding: 0 20px 24px;
-}
-.month-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--amber-bg);
-  border: 1px solid rgba(200,133,42,0.3);
-  border-radius: 20px; padding: 4px 12px;
-  font-size: 11px; color: var(--amber-light);
-  letter-spacing: 1px; text-transform: uppercase;
-  margin-bottom: 16px;
-}
-.book-hero {
-  display: flex; gap: 16px; align-items: flex-start;
-}
-.book-cover {
-  border-radius: 6px;
-  box-shadow: 6px 6px 24px rgba(0,0,0,0.5);
-  flex-shrink: 0; object-fit: cover;
-  background: linear-gradient(135deg, var(--burgundy), #2A0F17);
-}
-.book-cover-placeholder {
-  display: flex; align-items: center; justify-content: center;
-  font-size: 32px;
-}
-.book-hero .book-cover { width: 90px; height: 130px; }
-.book-hero-info { flex: 1; padding-top: 2px; }
-.book-hero-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 19px; color: white; line-height: 1.2;
-  margin-bottom: 4px;
-}
-.book-hero-author { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 6px; }
-.book-hero-genre {
-  display: inline-block;
-  font-size: 10px; font-weight: 500;
-  letter-spacing: 0.5px;
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.5);
-  padding: 2px 8px; border-radius: 10px;
-  margin-bottom: 10px;
-}
-.chosen-by { font-size: 11px; color: rgba(255,255,255,0.3); margin-bottom: 10px; }
-.chosen-by strong { color: var(--amber-light); }
-.stars-display { display: flex; align-items: center; gap: 2px; margin-bottom: 14px; }
-.star-f { color: var(--amber); font-size: 14px; }
-.star-e { color: rgba(255,255,255,0.15); font-size: 14px; }
-.stars-avg { font-size: 11px; color: rgba(255,255,255,0.35); margin-left: 6px; }
-.no-book-msg {
-  text-align: center; padding: 40px 20px;
-  color: rgba(255,255,255,0.4);
-  font-family: 'Playfair Display', serif;
-  font-style: italic; font-size: 16px;
-}
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.5px; }
+  .field input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  .field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(192,132,252,0.15);
+  }
 
-/* Discussions */
-.section-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 20px 20px 12px;
-}
-.section-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 17px; color: var(--ink);
-}
-.topic-card {
-  margin: 0 16px 10px;
-  background: white;
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  box-shadow: var(--shadow-sm);
-  cursor: pointer;
-  transition: box-shadow 0.2s;
-}
-.topic-card:active { box-shadow: var(--shadow-md); }
-.topic-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.avatar {
-  width: 28px; height: 28px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 600; color: white; flex-shrink: 0;
-}
-.topic-author-name { font-size: 12px; font-weight: 500; color: var(--ink-light); }
-.topic-time { font-size: 11px; color: var(--ink-faint); margin-left: auto; }
-.topic-text { font-size: 13px; color: var(--ink); line-height: 1.5; }
-.topic-replies { font-size: 11px; color: var(--amber); margin-top: 6px; font-weight: 500; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #a855f7);
+    color: white;
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    box-shadow: 0 4px 16px rgba(168,85,247,0.4);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(168,85,247,0.5); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--card2); }
+  .btn-danger { background: rgba(248,113,113,0.15); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); }
+  .btn-danger:hover { background: rgba(248,113,113,0.25); }
+  .btn-ghost { background: transparent; color: var(--muted); padding: 8px 12px; }
+  .btn-ghost:hover { color: var(--text); background: var(--card); }
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), #f59e0b);
+    color: #1a0a2e;
+    font-weight: 700;
+  }
+  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(251,191,36,0.4); }
 
-.empty-state {
-  text-align: center; padding: 32px 20px;
-  color: var(--ink-faint);
-  font-family: 'Playfair Display', serif;
-  font-style: italic; font-size: 15px;
-}
+  .auth-error {
+    background: rgba(248,113,113,0.1);
+    border: 1px solid rgba(248,113,113,0.3);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--danger);
+    margin-top: 12px;
+    display: none;
+  }
 
-/* ─── ACERVO ─── */
-.acervo-grid { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.acervo-card {
-  background: white;
-  border-radius: var(--radius);
-  padding: 14px;
-  display: flex; gap: 14px;
-  box-shadow: var(--shadow-sm);
-  cursor: pointer;
-  transition: box-shadow 0.2s;
-}
-.acervo-cover { width: 60px; height: 88px; border-radius: 4px; flex-shrink: 0; object-fit: cover; }
-.acervo-cover-ph {
-  display: flex; align-items: center; justify-content: center;
-  font-size: 24px;
-  background: linear-gradient(135deg, var(--burgundy), #2A0F17);
-}
-.acervo-info { flex: 1; }
-.acervo-month { font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-.acervo-title { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--ink); margin-bottom: 2px; line-height: 1.2; }
-.acervo-author { font-size: 12px; color: var(--ink-faint); margin-bottom: 6px; }
-.acervo-genre-tag {
-  display: inline-block; font-size: 10px; font-weight: 500;
-  background: var(--paper); color: var(--ink-light);
-  padding: 2px 8px; border-radius: 10px; margin-bottom: 6px;
-}
-.acervo-stars { display: flex; align-items: center; gap: 2px; }
-.acervo-star-f { color: var(--amber); font-size: 12px; }
-.acervo-star-e { color: rgba(28,26,22,0.15); font-size: 12px; }
-.acervo-avg { font-size: 11px; color: var(--ink-faint); margin-left: 4px; }
+  /* ===== APP SHELL ===== */
+  #app { display: none; flex-direction: column; min-height: 100vh; position: relative; z-index: 1; }
 
-/* ─── DISCUSSAO ─── */
-.disc-header {
-  background: var(--ink); padding: 0 20px 20px;
-}
-.disc-book-mini {
-  display: flex; gap: 12px; align-items: center;
-}
-.disc-cover { width: 44px; height: 64px; border-radius: 4px; flex-shrink: 0; object-fit: cover; }
-.disc-cover-ph {
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-  background: linear-gradient(135deg, var(--burgundy), #2A0F17);
-}
-.disc-title { font-family: 'Playfair Display', serif; font-size: 15px; color: white; margin-bottom: 2px; }
-.disc-author { font-size: 12px; color: rgba(255,255,255,0.4); }
+  /* TOP BAR */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,7,32,0.9);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-.topics-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
-.full-topic-card {
-  background: white; border-radius: var(--radius);
-  padding: 14px 16px; box-shadow: var(--shadow-sm);
-}
-.reply-area { padding: 0 16px 16px; }
-.reply-box {
-  display: flex; gap: 8px; align-items: flex-end;
-}
-.reply-input {
-  flex: 1; background: white;
-  border: 1.5px solid rgba(28,26,22,0.12);
-  border-radius: 10px; padding: 10px 14px;
-  font-family: 'DM Sans', sans-serif; font-size: 13px;
-  color: var(--ink); resize: none;
-  max-height: 100px;
-}
-.reply-input:focus { outline: none; border-color: var(--amber); }
-.reply-input::placeholder { color: var(--ink-faint); }
+  .topbar-logo {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 17px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent2), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 
-/* ─── AVALIAR ─── */
-.form-section { padding: 20px; }
-.form-group { margin-bottom: 20px; }
-.form-label {
-  display: block; font-size: 11px; font-weight: 600;
-  letter-spacing: 1px; text-transform: uppercase;
-  color: var(--ink-light); margin-bottom: 8px;
-}
-.stars-picker { display: flex; gap: 6px; }
-.star-pick {
-  font-size: 30px; cursor: pointer;
-  color: rgba(28,26,22,0.15);
-  transition: color 0.1s, transform 0.1s;
-  user-select: none;
-}
-.star-pick.on { color: var(--amber); }
-.star-pick:active { transform: scale(1.2); }
-.form-input {
-  width: 100%; background: white;
-  border: 1.5px solid rgba(28,26,22,0.1);
-  border-radius: 10px; padding: 12px 14px;
-  font-family: 'DM Sans', sans-serif; font-size: 13px;
-  color: var(--ink); resize: none;
-  transition: border-color 0.2s;
-}
-.form-input:focus { outline: none; border-color: var(--amber); }
-.form-input::placeholder { color: var(--ink-faint); }
-.form-select {
-  width: 100%; background: white;
-  border: 1.5px solid rgba(28,26,22,0.1);
-  border-radius: 10px; padding: 12px 14px;
-  font-family: 'DM Sans', sans-serif; font-size: 13px;
-  color: var(--ink); appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234A4640' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  cursor: pointer;
-}
-.form-select:focus { outline: none; border-color: var(--amber); }
+  .topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-.char-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-.char-tag {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--paper); border: 1px solid rgba(28,26,22,0.1);
-  border-radius: 20px; padding: 4px 10px;
-  font-size: 12px; color: var(--ink-light);
-}
-.char-tag-x {
-  cursor: pointer; color: var(--ink-faint);
-  font-size: 14px; line-height: 1;
-  transition: color 0.2s;
-}
-.char-tag-x:hover { color: var(--burgundy); }
-.char-input-row { display: flex; gap: 8px; }
-.char-input-row input {
-  flex: 1; background: white;
-  border: 1.5px solid rgba(28,26,22,0.1);
-  border-radius: 8px; padding: 9px 12px;
-  font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink);
-}
-.char-input-row input:focus { outline: none; border-color: var(--amber); }
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: white;
+    border: 2px solid rgba(192,132,252,0.3);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .avatar.admin { border-color: var(--gold); background: linear-gradient(135deg, var(--gold), #f59e0b); color: #1a0a2e; }
 
-/* ─── ADMIN ─── */
-.admin-tabs {
-  display: flex; background: var(--ink);
-  padding: 0 20px 16px; gap: 8px;
-}
-.admin-tab {
-  flex: 1; padding: 8px 6px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 11px; color: rgba(255,255,255,0.4);
-  cursor: pointer; text-align: center;
-  transition: all 0.2s;
-}
-.admin-tab.active {
-  background: var(--amber); border-color: var(--amber);
-  color: white; font-weight: 500;
-}
-.admin-panel { display: none; padding: 16px 20px; }
-.admin-panel.active { display: block; }
-.admin-card {
-  background: white; border-radius: var(--radius);
-  padding: 16px; margin-bottom: 14px;
-  box-shadow: var(--shadow-sm);
-}
-.genero-chip {
-  display:inline-flex; align-items:center;
-  background: var(--paper); border: 1.5px solid rgba(28,26,22,0.1);
-  border-radius: 20px; padding: 6px 12px;
-  font-size: 12px; color: var(--ink-light);
-  cursor: pointer; transition: all 0.15s;
-  user-select: none;
-}
-.genero-chip.selected {
-  background: var(--amber-bg); border-color: var(--amber);
-  color: var(--amber); font-weight: 600;
-}
-.escolhido-chip {
-  display:inline-flex; align-items:center; gap:6px;
-  background: var(--paper); border: 1.5px solid rgba(28,26,22,0.1);
-  border-radius: 20px; padding: 6px 12px;
-  font-size: 12px; color: var(--ink-light);
-  cursor: pointer; transition: all 0.15s;
-  user-select: none;
-}
-.escolhido-chip.selected {
-  background: var(--amber-bg); border-color: var(--amber);
-  color: var(--amber); font-weight: 600;
-}
-.admin-card-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 16px; color: var(--ink); margin-bottom: 14px;
-}
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(26,15,53,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 0 8px;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
 
-.upload-area {
-  border: 2px dashed rgba(28,26,22,0.15);
-  border-radius: 10px; padding: 20px;
-  text-align: center; background: var(--paper);
-  cursor: pointer; margin-bottom: 10px;
-  transition: border-color 0.2s;
-}
-.upload-area:hover { border-color: var(--amber); }
-.upload-area p { font-size: 12px; color: var(--ink-faint); margin-top: 4px; }
-.upload-area strong { font-size: 13px; color: var(--amber); }
-.upload-preview {
-  width: 80px; height: 116px;
-  border-radius: 6px; object-fit: cover;
-  margin: 0 auto 8px; display: block;
-}
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: var(--radius-sm);
+    position: relative;
+  }
 
-.sorteio-box {
-  background: var(--ink); border-radius: var(--radius);
-  padding: 20px; text-align: center; margin-bottom: 14px;
-}
-.sorteio-label { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
-.sorteio-result {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px; color: var(--amber-light);
-  min-height: 36px; margin-bottom: 14px;
-  transition: all 0.3s;
-}
-.fila-wrap { margin-bottom: 14px; }
-.fila-label { font-size: 11px; color: var(--ink-faint); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; }
-.fila-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.fila-chip {
-  background: var(--paper); border-radius: 20px;
-  padding: 4px 10px; font-size: 12px; color: var(--ink-light);
-  display: flex; align-items: center; gap: 5px;
-}
-.fila-chip.done { opacity: 0.35; text-decoration: line-through; }
-.fila-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); }
-.fila-chip.done .fila-dot { background: rgba(28,26,22,0.2); }
+  .nav-item .nav-icon { font-size: 22px; transition: transform 0.2s; }
+  .nav-item .nav-label { font-size: 10px; color: var(--muted); margin-top: 3px; font-weight: 500; transition: color 0.2s; }
+  .nav-item.active .nav-icon { transform: scale(1.1); }
+  .nav-item.active .nav-label { color: var(--accent2); }
+  .nav-item.active::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    width: 20px;
+    height: 3px;
+    background: var(--accent2);
+    border-radius: 2px;
+  }
 
-.genre-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-.genre-chip {
-  background: var(--paper); border: 1.5px solid rgba(28,26,22,0.08);
-  border-radius: 8px; padding: 10px 8px;
-  text-align: center; font-size: 12px; color: var(--ink-light);
-  transition: all 0.3s;
-}
-.genre-chip.picked {
-  border-color: var(--amber);
-  background: var(--amber-bg); color: var(--amber);
-  font-weight: 600;
-  animation: pop 0.3s ease;
-}
-@keyframes pop { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  /* MAIN CONTENT */
+  .main-content {
+    flex: 1;
+    padding: 0 0 80px;
+    overflow-y: auto;
+  }
 
-.member-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 0; border-bottom: 1px solid rgba(28,26,22,0.06);
-}
-.member-row:last-child { border-bottom: none; }
-.member-info { flex: 1; }
-.member-name { font-size: 13px; font-weight: 500; color: var(--ink); }
-.member-email { font-size: 11px; color: var(--ink-faint); }
-.member-role {
-  font-size: 10px; font-weight: 500; letter-spacing: 0.5px;
-  padding: 2px 8px; border-radius: 10px;
-  background: var(--paper); color: var(--ink-light);
-}
-.member-role.admin { background: var(--amber-bg); color: var(--amber); }
-.member-del {
-  width: 28px; height: 28px; border-radius: 50%;
-  background: none; border: 1.5px solid rgba(122,46,60,0.3);
-  color: var(--burgundy); cursor: pointer; font-size: 14px;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
-}
-.member-del:hover { background: var(--burgundy); color: white; }
+  /* SCREENS */
+  .screen { display: none; }
+  .screen.active { display: block; }
 
-/* ─── BOOK DETAIL ─── */
-.book-detail-header {
-  background: var(--ink); padding: 0 20px 24px;
-}
-.book-detail-cover {
-  width: 100px; height: 145px;
-  border-radius: 8px; object-fit: cover;
-  box-shadow: 8px 8px 32px rgba(0,0,0,0.5);
-  margin-bottom: 16px;
-}
-.book-detail-cover-ph {
-  display: flex; align-items: center; justify-content: center;
-  font-size: 40px;
-  background: linear-gradient(135deg, var(--burgundy), #2A0F17);
-}
-.book-detail-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 22px; color: white; line-height: 1.2; margin-bottom: 4px;
-}
-.book-detail-author { font-size: 14px; color: rgba(255,255,255,0.45); margin-bottom: 8px; }
-.book-detail-genre {
-  display: inline-block; font-size: 11px; font-weight: 500;
-  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5);
-  padding: 3px 10px; border-radius: 10px; margin-bottom: 8px;
-}
-.book-detail-meta { font-size: 12px; color: rgba(255,255,255,0.3); }
-.book-detail-meta strong { color: var(--amber-light); }
+  /* ===== HOME ===== */
+  .month-hero {
+    background: linear-gradient(180deg, var(--card2) 0%, var(--surface) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 16px 24px;
+  }
 
-.review-card {
-  background: white; border-radius: var(--radius);
-  padding: 14px 16px; margin: 0 16px 10px;
-  box-shadow: var(--shadow-sm);
-}
-.review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.review-user { flex: 1; }
-.review-user-name { font-size: 13px; font-weight: 500; color: var(--ink); }
-.review-stars { display: flex; gap: 2px; }
-.review-star-f { color: var(--amber); font-size: 13px; }
-.review-star-e { color: rgba(28,26,22,0.15); font-size: 13px; }
-.review-field { margin-bottom: 8px; }
-.review-field-label {
-  font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
-  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 3px;
-}
-.review-field-val { font-size: 13px; color: var(--ink); line-height: 1.5; }
-.char-pills { display: flex; flex-wrap: wrap; gap: 4px; }
-.char-pill {
-  background: var(--paper); border-radius: 20px;
-  padding: 2px 8px; font-size: 11px; color: var(--ink-light);
-}
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
 
-/* ─── BUTTONS ─── */
-.btn {
-  display: flex; align-items: center; justify-content: center;
-  gap: 8px; border: none; border-radius: 10px;
-  padding: 12px 18px; font-family: 'DM Sans', sans-serif;
-  font-size: 14px; font-weight: 500; cursor: pointer;
-  width: 100%; transition: opacity 0.2s, transform 0.1s;
-}
-.btn:active { transform: scale(0.98); }
-.btn-primary { background: var(--amber); color: white; }
-.btn-secondary { background: transparent; border: 1.5px solid var(--ink); color: var(--ink); }
-.btn-dark { background: var(--ink); color: white; }
-.btn-danger { background: var(--burgundy); color: white; }
-.btn-sm { padding: 8px 14px; font-size: 13px; border-radius: 8px; width: auto; }
-.btn:disabled { opacity: 0.5; pointer-events: none; }
+  .month-nav .month-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent2);
+    text-transform: capitalize;
+  }
 
-/* ─── TOAST ─── */
-.toast {
-  position: fixed; bottom: 90px; left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--ink); color: white;
-  padding: 10px 20px; border-radius: 20px;
-  font-size: 13px; font-weight: 500;
-  opacity: 0; transition: all 0.3s;
-  z-index: 200; white-space: nowrap;
-  box-shadow: var(--shadow-lg);
-  pointer-events: none;
-}
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .month-nav button {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+  .month-nav button:hover { background: var(--card2); color: var(--text); }
 
-/* ─── MODAL ─── */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 150; display: none;
-  align-items: flex-end; justify-content: center;
-}
-.modal-overlay.open { display: flex; }
-.modal {
-  background: var(--cream);
-  border-radius: 20px 20px 0 0;
-  padding: 20px; width: 100%; max-width: 480px;
-  max-height: 90vh; overflow-y: auto;
-  animation: slideUp 0.3s ease;
-}
-@keyframes slideUp { from{transform:translateY(60px);opacity:0} to{transform:translateY(0);opacity:1} }
-.modal-handle {
-  width: 36px; height: 4px;
-  background: rgba(28,26,22,0.15);
-  border-radius: 2px; margin: 0 auto 16px;
-}
-.modal-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 18px; color: var(--ink); margin-bottom: 16px;
-}
+  .book-hero {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
 
-/* ─── UTILITIES ─── */
-.hidden { display: none !important; }
-.mt-8 { margin-top: 8px; }
-.mt-12 { margin-top: 12px; }
-.gap-8 { gap: 8px; }
-.text-center { text-align: center; }
+  .book-cover-wrap {
+    flex-shrink: 0;
+    position: relative;
+  }
 
-.page-top {
-  padding: 16px 20px 0;
-}
-.page-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px; color: var(--ink);
-}
-.page-subtitle { font-size: 13px; color: var(--ink-faint); margin-top: 2px; }
+  .book-cover {
+    width: 100px;
+    height: 148px;
+    border-radius: 6px;
+    object-fit: cover;
+    box-shadow: 6px 8px 24px rgba(0,0,0,0.6), var(--glow);
+    display: block;
+  }
 
-.avatar-colors { }
+  .book-cover-placeholder {
+    width: 100px;
+    height: 148px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--card), var(--card2));
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    box-shadow: 6px 8px 24px rgba(0,0,0,0.6);
+  }
+
+  .book-info { flex: 1; min-width: 0; }
+
+  .badge-genre {
+    display: inline-block;
+    background: rgba(192,132,252,0.15);
+    border: 1px solid rgba(192,132,252,0.25);
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin: 0 4px 4px 0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .book-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1.2;
+    margin: 8px 0 4px;
+    color: var(--text);
+  }
+
+  .book-author {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .book-chosen-by {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .book-chosen-by span { color: var(--accent2); font-weight: 600; }
+
+  .stars-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 0;
+  }
+
+  .stars { display: flex; gap: 2px; }
+  .star { font-size: 16px; }
+  .star.filled { color: var(--gold); }
+  .star.empty { color: rgba(251,191,36,0.2); }
+  .star.half { position: relative; }
+
+  .rating-info { font-size: 13px; color: var(--muted); }
+  .rating-info strong { color: var(--gold); }
+
+  .empty-month {
+    text-align: center;
+    padding: 40px 16px;
+  }
+  .empty-month .icon { font-size: 48px; margin-bottom: 12px; display: block; opacity: 0.5; }
+  .empty-month p { color: var(--muted); font-size: 14px; }
+
+  /* SECTION */
+  .section { padding: 20px 16px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* TOPIC CARD */
+  .topic-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+    cursor: pointer;
+  }
+  .topic-card:hover { border-color: rgba(192,132,252,0.3); }
+  .topic-card .tc-header { display: flex; align-items: flex-start; gap: 10px; }
+  .topic-card .tc-avatar { width: 30px; height: 30px; border-radius: 50%; font-size: 11px; flex-shrink: 0; }
+  .topic-card .tc-meta { flex: 1; min-width: 0; }
+  .topic-card .tc-user { font-size: 12px; color: var(--accent); font-weight: 600; }
+  .topic-card .tc-time { font-size: 11px; color: var(--muted); }
+  .topic-card .tc-title { font-size: 14px; font-weight: 600; margin: 6px 0 4px; line-height: 1.3; }
+  .topic-card .tc-preview { font-size: 13px; color: var(--muted); line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .topic-card .tc-footer { display: flex; gap: 12px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .topic-card .tc-stat { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); }
+
+  /* DISCUSSION DETAIL */
+  .discussion-header {
+    padding: 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .reply-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 8px;
+  }
+  .reply-card .rc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .reply-card .rc-text { font-size: 14px; line-height: 1.6; color: var(--text); }
+  .reply-card .rc-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+  .reply-box {
+    position: sticky;
+    bottom: 80px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .reply-box textarea {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    resize: none;
+    min-height: 42px;
+    max-height: 120px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .reply-box textarea:focus { border-color: var(--accent); }
+
+  /* ACERVO */
+  .acervo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .acervo-item {
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--card);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .acervo-item:hover { border-color: rgba(192,132,252,0.3); transform: translateY(-2px); }
+
+  .acervo-cover {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    display: block;
+  }
+
+  .acervo-cover-ph {
+    width: 100%;
+    aspect-ratio: 2/3;
+    background: linear-gradient(135deg, var(--card), var(--card2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+
+  .acervo-info { padding: 8px; }
+  .acervo-month { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .acervo-title { font-size: 12px; font-weight: 600; line-height: 1.3; margin: 2px 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .acervo-stars { font-size: 11px; color: var(--gold); margin-top: 2px; }
+
+  /* BOOK DETAIL MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    animation: slideUp 0.3s ease;
+  }
+
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 12px auto 0;
+  }
+
+  .modal-header {
+    padding: 16px 16px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .modal-body { padding: 16px; }
+
+  /* AVALIAÇÕES */
+  .avaliacao-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+  .avaliacao-card .av-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .avaliacao-card .av-name { font-weight: 600; font-size: 14px; }
+  .avaliacao-card .av-date { font-size: 11px; color: var(--muted); margin-left: auto; }
+  .avaliacao-card .av-stars { margin-bottom: 8px; }
+  .avaliacao-card .av-comment { font-size: 14px; line-height: 1.6; color: var(--muted); }
+  .avaliacao-card .av-trecho { font-size: 13px; font-style: italic; color: var(--accent2); border-left: 2px solid var(--accent); padding-left: 10px; margin: 8px 0; }
+  .avaliacao-card .av-personagens { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .avaliacao-card .av-personagens span { color: var(--accent); }
+
+  /* STAR PICKER */
+  .star-picker { display: flex; gap: 8px; margin: 8px 0; }
+  .star-picker .sp-star {
+    font-size: 28px;
+    cursor: pointer;
+    transition: transform 0.15s;
+    color: rgba(251,191,36,0.25);
+  }
+  .star-picker .sp-star.active { color: var(--gold); transform: scale(1.1); }
+
+  /* TEXTAREA */
+  .textarea-field {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 80px;
+  }
+  .textarea-field:focus { border-color: var(--accent); }
+
+  /* ADMIN */
+  .admin-tabs {
+    display: flex;
+    padding: 0 16px;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    overflow-x: auto;
+  }
+
+  .admin-tab {
+    padding: 14px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .admin-tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+  .admin-section { display: none; padding: 16px; }
+  .admin-section.active { display: block; }
+
+  .form-field { margin-bottom: 14px; }
+  .form-field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .form-field input, .form-field select, .form-field textarea {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: var(--accent); }
+  .form-field select option { background: var(--card2); }
+
+  .genre-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .genre-cb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+  .genre-cb input { display: none; }
+  .genre-cb.checked {
+    background: rgba(192,132,252,0.15);
+    border-color: var(--accent);
+    color: var(--accent2);
+  }
+
+  .member-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .member-row:last-child { border-bottom: none; }
+  .member-info { flex: 1; }
+  .member-info .m-name { font-size: 14px; font-weight: 600; }
+  .member-info .m-user { font-size: 12px; color: var(--muted); }
+  .member-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+  .member-badge.admin { background: rgba(251,191,36,0.15); color: var(--gold); }
+  .member-badge.member { background: rgba(192,132,252,0.15); color: var(--accent); }
+
+  /* SORTEIO */
+  .sorteio-result {
+    background: linear-gradient(135deg, var(--card), var(--card2));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    margin: 16px 0;
+  }
+  .sorteio-result .sr-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .sorteio-result .sr-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent2), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 1000;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: rgba(74,222,128,0.3); color: var(--success); }
+  .toast.error { border-color: rgba(248,113,113,0.3); color: var(--danger); }
+
+  /* LOADING */
+  .loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+  .spinner {
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  /* SEPARATOR */
+  .sep { height: 1px; background: var(--border); margin: 8px 0; }
+
+  /* UPLOAD PREVIEW */
+  .upload-area {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .upload-area:hover { border-color: var(--accent); }
+  .upload-area input { display: none; }
+  .upload-preview { width: 80px; height: 118px; object-fit: cover; border-radius: 6px; margin: 8px auto 0; display: block; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* DIVIDER */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* NEW TOPIC MODAL */
+  .full-modal {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 300;
+    display: none;
+    flex-direction: column;
+  }
+  .full-modal.active { display: flex; }
+  .full-modal-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+  }
+  .full-modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .full-modal-body { flex: 1; padding: 16px; overflow-y: auto; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+  }
+  .empty-state .es-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; display: block; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+
+  /* CONFIRM DIALOG */
+  .confirm-dialog {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .confirm-dialog.active { display: flex; }
+  .confirm-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+    max-width: 320px;
+    animation: fadeUp 0.2s ease;
+  }
+  .confirm-box h3 { font-family: 'Playfair Display', serif; font-size: 17px; margin-bottom: 8px; }
+  .confirm-box p { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+  .confirm-actions { display: flex; gap: 10px; }
+  .confirm-actions .btn { flex: 1; }
+
+  /* PROFILE MENU */
+  .profile-menu {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+  }
+  .profile-menu.active { display: flex; }
+  .profile-menu-inner {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    border-top: 1px solid var(--border);
+    padding: 20px 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0));
+    width: 100%;
+    animation: slideUp 0.25s ease;
+  }
+  .pm-user { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .pm-user .pm-name { font-weight: 700; font-size: 16px; }
+  .pm-user .pm-username { font-size: 13px; color: var(--muted); }
+  .pm-user .pm-role { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; margin-top: 2px; display: inline-block; }
+
+  /* BACK BTN */
+  .back-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 56px;
+    z-index: 50;
+  }
+  .back-header h2 { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; }
+
+  .tag { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; letter-spacing: 0.3px; }
+  .tag-purple { background: rgba(192,132,252,0.15); color: var(--accent); border: 1px solid rgba(192,132,252,0.2); }
+  .tag-gold { background: rgba(251,191,36,0.15); color: var(--gold); border: 1px solid rgba(251,191,36,0.2); }
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
-<div id="loading-screen">
-  <div class="logo-load">Clube<span>Leitura</span></div>
-  <div class="spinner"></div>
-</div>
-
-<!-- LOGIN -->
-<div id="login-screen" class="hidden">
-  <div class="login-logo">Clube<span>Leitura</span></div>
-  <div class="login-tagline">O app do seu clube do livro</div>
-  <div class="login-card">
-    <h2>Entrar</h2>
-    <input id="login-username" class="login-input" type="text" placeholder="usuário (ex: mariaalves)" autocomplete="username" autocapitalize="none">
-    <input id="login-password" class="login-input" type="password" placeholder="Senha" autocomplete="current-password">
-    <div id="login-error" class="login-error"></div>
-    <button class="btn btn-primary mt-8" onclick="doLogin()">Entrar no clube</button>
-    <div style="text-align:center;margin-top:16px">
-      <span style="font-size:13px;color:rgba(255,255,255,0.35)">Quer participar? </span>
-      <span style="font-size:13px;color:var(--amber-light);cursor:pointer;font-weight:500" onclick="showCadastro()">Solicitar acesso</span>
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-logo">
+    <span class="icon">📚</span>
+    <h1>Leitores<br>Fofoqueiros</h1>
+    <p>Clube do livro</p>
+  </div>
+  <div class="auth-card">
+    <h2>Entrar no clube</h2>
+    <div class="field">
+      <label>Usuário</label>
+      <input type="text" id="login-user" placeholder="seu.usuario" autocomplete="username" autocapitalize="none">
     </div>
-  </div>
-</div>
-
-<!-- CADASTRO -->
-<div id="cadastro-screen" class="hidden">
-  <div class="login-logo">Clube<span>Leitura</span></div>
-  <div class="login-tagline">Solicitar participação no clube</div>
-  <div class="login-card" style="max-width:360px;width:100%">
-    <h2>Cadastro</h2>
-    <input id="cad-name" class="login-input" type="text" placeholder="Nome completo">
-    <label style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.5px;margin-bottom:4px;display:block">Data de nascimento</label>
-    <input id="cad-nascimento" class="login-input" type="date">
-    <input id="cad-email" class="login-input" type="email" placeholder="Email">
-    <input id="cad-telefone" class="login-input" type="tel" placeholder="Telefone (ex: 44999999999)">
-    <input id="cad-username" class="login-input" type="text" placeholder="Usuário (ex: mariaalves)" autocapitalize="none">
-    <input id="cad-pass" class="login-input" type="password" placeholder="Senha (mín. 6 caracteres)">
-    <div id="cad-error" class="login-error"></div>
-    <button class="btn btn-primary mt-8" onclick="doCadastro()">Enviar solicitação</button>
-    <div style="text-align:center;margin-top:12px">
-      <span style="font-size:13px;color:rgba(255,255,255,0.35);cursor:pointer" onclick="showLogin()">← Voltar ao login</span>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
     </div>
-  </div>
-</div>
-
-<!-- SUCESSO CADASTRO -->
-<div id="cadastro-sucesso-screen" class="hidden">
-  <div class="login-logo">Clube<span>Leitura</span></div>
-  <div class="login-card" style="max-width:360px;width:100%;text-align:center">
-    <div style="font-size:48px;margin-bottom:16px">📬</div>
-    <h2 style="margin-bottom:12px">Solicitação enviada!</h2>
-    <p style="font-size:14px;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:24px">Sua solicitação foi enviada ao administrador. Assim que for aprovada, você poderá fazer login normalmente.</p>
-    <button class="btn btn-primary" onclick="showLogin();document.getElementById('cadastro-sucesso-screen').classList.add('hidden')">← Voltar ao login</button>
-  </div>
-</div>
-
-<!-- SETUP (primeiro acesso) -->
-<div id="setup-screen" class="hidden">
-  <div class="login-logo">Clube<span>Leitura</span></div>
-  <div class="login-tagline">Primeiro acesso — configure o administrador</div>
-  <div class="login-card">
-    <h2>Criar ADM</h2>
-    <input id="setup-name" class="login-input" type="text" placeholder="Seu nome (ex: Rafael Barros)">
-    <input id="setup-username" class="login-input" type="text" placeholder="Usuário (ex: rafaelbarros)" autocapitalize="none">
-    <input id="setup-pass" class="login-input" type="password" placeholder="Senha">
-    <div id="setup-error" class="login-error"></div>
-    <button class="btn btn-primary mt-8" onclick="doSetup()">Criar administrador</button>
+    <button class="btn btn-primary" onclick="doLogin()">Entrar</button>
+    <div class="auth-error" id="auth-error">Usuário ou senha incorretos.</div>
   </div>
 </div>
 
 <!-- APP -->
-<div id="app" class="hidden">
-  <div class="app-header">
-    <div class="header-logo">Clube<span>Leitura</span></div>
-    <div class="header-right">
-      <div id="admin-pill" class="admin-pill hidden">ADM</div>
-      <button id="notif-bell" class="notification-bell hidden" onclick="goTo('admin');switchAdminTab('membros');switchMembrosTab('pendentes')">
-        🔔<span id="notif-badge" class="notif-badge hidden">0</span>
-      </button>
-      <div style="position:relative">
-        <div id="header-avatar" class="header-avatar" onclick="toggleAvatarMenu()"></div>
-        <div id="avatar-menu" class="hidden" style="position:absolute;right:0;top:44px;background:white;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.2);min-width:160px;overflow:hidden;z-index:200">
-          <div style="padding:8px 0">
-            <button onclick="alterarSenha();toggleAvatarMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 16px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;color:#1C1A16;text-align:left">
-              🔑 Alterar senha
-            </button>
-            <div style="height:1px;background:rgba(28,26,22,0.08);margin:0 16px"></div>
-            <button onclick="doLogout();toggleAvatarMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 16px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;color:#7A2E3C;text-align:left">
-              🚪 Sair
-            </button>
-          </div>
-        </div>
-      </div>
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-logo">Leitores Fofoqueiros</div>
+    <div class="topbar-user">
+      <div class="avatar" id="topbar-avatar" onclick="openProfileMenu()"></div>
     </div>
   </div>
 
-  <div class="content">
-    <!-- HOME -->
-    <div id="screen-home" class="screen active">
-      <div style="background:var(--ink);padding:8px 20px 0;display:flex;align-items:center;justify-content:space-between;">
-        <button onclick="changeHomeMonth(-1)" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:22px;cursor:pointer;padding:4px 8px;">‹</button>
-        <div id="home-month-label" style="font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;"></div>
-        <button onclick="changeHomeMonth(1)" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:22px;cursor:pointer;padding:4px 8px;">›</button>
-      </div>
-      <div class="hero-section" id="home-hero">
-        <div class="no-book-msg">Nenhum livro registrado este mês.</div>
-      </div>
-      <div class="section-header">
-        <div class="section-title">💬 Discussões</div>
-        <button class="btn btn-primary btn-sm" id="btn-new-topic" onclick="openNewTopicModal()">+ Tópico</button>
-      </div>
-      <div id="topics-list"></div>
-    </div>
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
 
-    <!-- ACERVO -->
-    <div id="screen-acervo" class="screen">
-      <div class="page-top">
-        <div class="page-title">Acervo</div>
-        <div class="page-subtitle">Todos os livros do clube</div>
+    <!-- HOME SCREEN -->
+    <div class="screen active" id="screen-home">
+      <!-- Month Hero -->
+      <div class="month-hero" id="home-hero">
+        <div class="loading-spinner"><div class="spinner"></div></div>
       </div>
-      <div id="acervo-list" class="acervo-grid"></div>
-    </div>
 
-    <!-- DISCUSSÃO (tópico aberto) -->
-    <div id="screen-disc" class="screen">
-      <div class="disc-header" id="disc-header"></div>
-      <div id="disc-topics" class="topics-list"></div>
-      <div class="reply-area" id="disc-reply-area" style="display:none">
-        <div style="font-size:12px;color:var(--ink-faint);margin-bottom:6px;" id="reply-context"></div>
-        <div class="reply-box">
-          <textarea class="reply-input" id="reply-input" rows="2" placeholder="Escreva um tópico ou resposta…"></textarea>
-          <button class="btn btn-primary btn-sm" onclick="postTopic()">Enviar</button>
+      <!-- Discussions Section -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">💬 Discussões</div>
+          <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="openNewTopic()">+ Tópico</button>
+        </div>
+        <div id="topics-list">
+          <div class="loading-spinner"><div class="spinner"></div></div>
         </div>
       </div>
     </div>
 
-    <!-- AVALIAR -->
-    <div id="screen-avaliar" class="screen">
-      <div class="hero-section" id="avaliar-hero"></div>
-      <div class="form-section">
-        <div id="already-reviewed-msg" class="hidden">
-          <div class="empty-state">✅ Você já avaliou este livro!</div>
-          <div style="display:flex;gap:8px;margin-top:12px">
-            <button class="btn btn-secondary" onclick="editReview()">✏️ Editar</button>
-            <button class="btn btn-danger" onclick="deleteReview()" style="width:auto;padding:12px 18px">🗑️</button>
-          </div>
-        </div>
-        <div id="review-form">
-          <div class="form-group">
-            <label class="form-label">Sua nota ⭐</label>
-            <div class="stars-picker" id="stars-picker">
-              <span class="star-pick" data-v="1" onclick="pickStar(1)">★</span>
-              <span class="star-pick" data-v="2" onclick="pickStar(2)">★</span>
-              <span class="star-pick" data-v="3" onclick="pickStar(3)">★</span>
-              <span class="star-pick" data-v="4" onclick="pickStar(4)">★</span>
-              <span class="star-pick" data-v="5" onclick="pickStar(5)">★</span>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Personagens principais</label>
-            <div class="char-tags" id="char-tags"></div>
-            <div class="char-input-row">
-              <input type="text" id="char-input" placeholder="Nome do personagem…" onkeydown="charKeydown(event)">
-              <button class="btn btn-dark btn-sm" onclick="addChar()">+</button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Trecho favorito</label>
-            <textarea class="form-input" id="trecho-input" rows="3" placeholder="Cole ou escreva o trecho que mais te marcou…"></textarea>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Comentário</label>
-            <textarea class="form-input" id="comment-input" rows="3" placeholder="O que você achou do livro?"></textarea>
-          </div>
-          <button class="btn btn-primary" onclick="submitReview()">✅ Enviar avaliação</button>
-        </div>
+    <!-- ACERVO SCREEN -->
+    <div class="screen" id="screen-acervo">
+      <div class="section-header" style="padding:16px 16px 0">
+        <div class="section-title">📖 Acervo</div>
       </div>
-      <!-- Avaliações de todos -->
-      <div style="padding:0 16px 4px 16px">
-        <div class="section-title" style="padding:16px 0 12px">⭐ Avaliações do clube</div>
+      <div class="acervo-grid" id="acervo-grid">
+        <div class="loading-spinner" style="grid-column:1/-1"><div class="spinner"></div></div>
       </div>
-      <div id="all-reviews-list" style="padding:0 16px 80px"></div>
     </div>
 
-    <!-- ADMIN -->
-    <div id="screen-admin" class="screen">
+    <!-- DISCUSS SCREEN -->
+    <div class="screen" id="screen-discuss">
+      <div class="back-header">
+        <button class="btn btn-ghost" style="padding:4px 8px" onclick="goBack()">←</button>
+        <h2 id="discuss-title">Discussões</h2>
+      </div>
+      <div id="discuss-content" style="padding:16px"></div>
+      <div class="reply-box" id="reply-box">
+        <textarea id="reply-textarea" placeholder="Escreva uma resposta..." rows="1"></textarea>
+        <button class="btn btn-primary" style="padding:10px 14px;flex-shrink:0" onclick="sendReply()">→</button>
+      </div>
+    </div>
+
+    <!-- AVALIAR SCREEN -->
+    <div class="screen" id="screen-avaliar">
+      <div class="section-header" style="padding:16px 16px 0">
+        <div class="section-title">⭐ Avaliar</div>
+      </div>
+      <div style="padding:0 16px 16px" id="avaliar-content">
+        <div class="loading-spinner"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ADMIN SCREEN -->
+    <div class="screen" id="screen-admin">
       <div class="admin-tabs">
-        <button class="admin-tab active" onclick="switchAdminTab('livro')">📖 Livro</button>
-        <button class="admin-tab" onclick="switchAdminTab('sorteio')">🎲 Sorteio</button>
-        <button class="admin-tab" onclick="switchAdminTab('membros')">👥 Membros</button>
+        <div class="admin-tab active" onclick="switchAdminTab('livro')">📗 Livro</div>
+        <div class="admin-tab" onclick="switchAdminTab('sorteio')">🎲 Sorteio</div>
+        <div class="admin-tab" onclick="switchAdminTab('membros')">👥 Membros</div>
       </div>
 
-      <!-- TAB LIVRO -->
-      <div id="admin-livro" class="admin-panel active">
-        <div class="admin-card">
-          <div class="admin-card-title" id="book-form-title">📖 Registrar livro do mês</div>
-          <div style="display:flex;gap:8px;margin-bottom:10px">
-            <select class="form-select" id="book-mes" style="flex:1">
-              <option value="01">Janeiro</option><option value="02">Fevereiro</option>
-              <option value="03">Março</option><option value="04">Abril</option>
-              <option value="05">Maio</option><option value="06">Junho</option>
-              <option value="07">Julho</option><option value="08">Agosto</option>
-              <option value="09">Setembro</option><option value="10">Outubro</option>
-              <option value="11">Novembro</option><option value="12">Dezembro</option>
-            </select>
-            <select class="form-select" id="book-ano" style="width:100px"></select>
-          </div>
-          <input class="form-input" id="book-titulo" placeholder="Título do livro" style="margin-bottom:10px">
-          <input class="form-input" id="book-autor" placeholder="Autor" style="margin-bottom:10px">
-          <div style="margin-bottom:10px">
-            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ink-light);margin-bottom:8px">Gêneros (selecione um ou mais)</div>
-            <div id="genero-chips" style="display:flex;flex-wrap:wrap;gap:6px">
-              <div class="genero-chip" onclick="toggleGenero(this)" data-v="🌹 Romance">🌹 Romance</div>
-              <div class="genero-chip" onclick="toggleGenero(this)" data-v="🧙 Fantasia">🧙 Fantasia</div>
-              <div class="genero-chip" onclick="toggleGenero(this)" data-v="🔍 Suspense">🔍 Suspense</div>
-              <div class="genero-chip" onclick="toggleGenero(this)" data-v="🕵️ Policial">🕵️ Policial</div>
-              <div class="genero-chip" onclick="toggleGenero(this)" data-v="🚀 Ficção Científica">🚀 Ficção Científica</div>
-              <div class="genero-chip" onclick="toggleGenero(this)" data-v="💡 Autoajuda">💡 Autoajuda</div>
-              <div class="genero-chip" onclick="toggleGenero(this)" data-v="📜 Biografia">📜 Biografia</div>
-              <div class="genero-chip" onclick="toggleGenero(this)" data-v="😂💕 Comédia Romântica">😂💕 Comédia Romântica</div>
-              <div class="genero-chip" onclick="toggleGenero(this)" data-v="😂 Comédia">😂 Comédia</div>
-              <div class="genero-chip" onclick="toggleGenero(this)" data-v="🇧🇷 Literatura Brasileira">🇧🇷 Literatura Brasileira</div>
-            </div>
-          </div>
-          <div style="margin-bottom:10px">
-            <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ink-light);margin-bottom:8px">Escolhido por</div>
-            <div id="escolhido-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
-            <div style="font-size:11px;color:var(--ink-faint)">Selecione um membro acima</div>
-          </div>
-          <div class="upload-area" onclick="document.getElementById('cover-upload').click()">
-            <img id="cover-preview" class="upload-preview hidden">
-            <div id="upload-placeholder">
-              <div style="font-size:28px">🖼️</div>
-              <p><strong>Toque para enviar a capa</strong></p>
-              <p>JPG, PNG até 5MB</p>
-            </div>
-          </div>
-          <input type="file" id="cover-upload" accept="image/*" class="hidden" onchange="previewCover(event)">
-          <div style="display:flex;gap:8px;margin-top:12px">
-            <button class="btn btn-primary" onclick="registerBook()" id="btn-register-book">➕ Registrar livro</button>
-            <button class="btn btn-secondary hidden" onclick="cancelEditBook()" id="btn-cancel-edit" style="width:auto;padding:12px 16px">✕</button>
-          </div>
+      <!-- ADMIN: LIVRO -->
+      <div class="admin-section active" id="admin-livro">
+        <h3 style="font-family:'Playfair Display',serif;margin-bottom:16px;font-size:15px;color:var(--accent2)">Livro do Mês</h3>
+
+        <div class="form-field">
+          <label>Mês / Ano</label>
+          <input type="month" id="adm-mes" >
         </div>
-        <div class="admin-card">
-          <div class="admin-card-title">✏️ Editar livro registrado</div>
-          <div style="font-size:13px;color:var(--ink-faint);margin-bottom:12px">Selecione o mês para carregar e editar.</div>
-          <div style="display:flex;gap:8px;margin-bottom:10px">
-            <select class="form-select" id="edit-mes" style="flex:1">
-              <option value="01">Janeiro</option><option value="02">Fevereiro</option>
-              <option value="03">Março</option><option value="04">Abril</option>
-              <option value="05">Maio</option><option value="06">Junho</option>
-              <option value="07">Julho</option><option value="08">Agosto</option>
-              <option value="09">Setembro</option><option value="10">Outubro</option>
-              <option value="11">Novembro</option><option value="12">Dezembro</option>
-            </select>
-            <select class="form-select" id="edit-ano" style="width:100px"></select>
-          </div>
-          <button class="btn btn-dark" onclick="loadBookForEdit()">📂 Carregar livro</button>
+        <div class="form-field">
+          <label>Título</label>
+          <input type="text" id="adm-titulo" placeholder="Título do livro">
         </div>
-        <div class="admin-card">
-          <div class="admin-card-title">🔄 Zerar avaliações</div>
-          <div style="font-size:13px;color:var(--ink-faint);margin-bottom:12px">Apaga todas as avaliações de um mês e zera a média.</div>
-          <div style="display:flex;gap:8px;margin-bottom:10px">
-            <select class="form-select" id="zero-mes" style="flex:1">
-              <option value="01">Janeiro</option><option value="02">Fevereiro</option>
-              <option value="03">Março</option><option value="04">Abril</option>
-              <option value="05">Maio</option><option value="06">Junho</option>
-              <option value="07">Julho</option><option value="08">Agosto</option>
-              <option value="09">Setembro</option><option value="10">Outubro</option>
-              <option value="11">Novembro</option><option value="12">Dezembro</option>
-            </select>
-            <select class="form-select" id="zero-ano" style="width:100px"></select>
-          </div>
-          <button class="btn btn-danger" onclick="zerarAvaliacoes()">🔄 Zerar avaliações</button>
+        <div class="form-field">
+          <label>Autor</label>
+          <input type="text" id="adm-autor" placeholder="Nome do autor">
         </div>
-        <div class="admin-card">
-          <div class="admin-card-title">🗑️ Apagar livro</div>
-          <div style="font-size:13px;color:var(--ink-faint);margin-bottom:12px">Selecione o mês e ano do livro a apagar.</div>
-          <div style="display:flex;gap:8px;margin-bottom:10px">
-            <select class="form-select" id="del-mes" style="flex:1">
-              <option value="01">Janeiro</option><option value="02">Fevereiro</option>
-              <option value="03">Março</option><option value="04">Abril</option>
-              <option value="05">Maio</option><option value="06">Junho</option>
-              <option value="07">Julho</option><option value="08">Agosto</option>
-              <option value="09">Setembro</option><option value="10">Outubro</option>
-              <option value="11">Novembro</option><option value="12">Dezembro</option>
-            </select>
-            <select class="form-select" id="del-ano" style="width:100px"></select>
+        <div class="form-field">
+          <label>Gêneros</label>
+          <div class="genre-checkboxes" id="genre-checkboxes"></div>
+        </div>
+        <div class="form-field">
+          <label>Escolhido por</label>
+          <select id="adm-escolhido">
+            <option value="">Selecionar membro...</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Capa do livro</label>
+          <div class="upload-area" onclick="document.getElementById('adm-capa-input').click()">
+            <span style="font-size:24px">📷</span>
+            <p style="font-size:13px;color:var(--muted);margin-top:8px">Toque para selecionar imagem</p>
+            <input type="file" id="adm-capa-input" accept="image/*" onchange="previewCover(event)">
+            <img id="adm-capa-preview" class="upload-preview" style="display:none">
           </div>
-          <button class="btn btn-danger" onclick="deleteBook()">🗑️ Apagar livro</button>
+          <p style="font-size:11px;color:var(--muted);margin-top:6px">Ou cole URL da imagem:</p>
+          <input type="url" id="adm-capa-url" placeholder="https://..." style="margin-top:6px;padding:8px 12px;font-size:13px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);width:100%;outline:none">
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" style="flex:1" onclick="saveBook()">Salvar Livro</button>
+          <button class="btn btn-secondary" onclick="loadAdminBook()">↺</button>
+        </div>
+
+        <div id="admin-book-current" style="margin-top:20px"></div>
+      </div>
+
+      <!-- ADMIN: SORTEIO -->
+      <div class="admin-section" id="admin-sorteio">
+        <h3 style="font-family:'Playfair Display',serif;margin-bottom:16px;font-size:15px;color:var(--accent2)">Sorteios</h3>
+
+        <div style="margin-bottom:20px">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Próximo a escolher o livro (fila justa, sem repetição)</p>
+          <button class="btn btn-gold" style="width:100%;margin-bottom:10px" onclick="sortearMembro()">🎲 Sortear Membro</button>
+          <div id="sorteio-membro-result"></div>
+          <button class="btn btn-ghost" style="font-size:12px" onclick="resetFila()">↺ Reiniciar fila</button>
+        </div>
+
+        <div class="sep"></div>
+
+        <div style="margin-top:16px">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Sortear um gênero</p>
+          <button class="btn btn-secondary" style="width:100%;margin-bottom:10px" onclick="sortearGenero()">🎲 Sortear Gênero</button>
+          <div id="sorteio-genero-result"></div>
+        </div>
+
+        <div class="sep" style="margin-top:16px"></div>
+        <div style="margin-top:16px">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Fila atual</p>
+          <div id="fila-list"></div>
         </div>
       </div>
 
-      <!-- TAB SORTEIO -->
-      <div id="admin-sorteio" class="admin-panel">
-        <div class="admin-card">
-          <div class="admin-card-title">🎲 Sortear próximo escolhedor</div>
-          <div class="sorteio-box">
-            <div class="sorteio-label">Próximo a escolher o livro</div>
-            <div class="sorteio-result" id="sorteio-membro-result">—</div>
-            <button class="btn btn-primary btn-sm" onclick="sortearMembro()">🎲 Sortear</button>
-          </div>
-          <div class="fila-wrap">
-            <div class="fila-label">Fila atual</div>
-            <div class="fila-chips" id="fila-chips"></div>
-          </div>
-          <button class="btn btn-secondary btn-sm" onclick="resetFila()" style="width:auto">↺ Reiniciar fila</button>
+      <!-- ADMIN: MEMBROS -->
+      <div class="admin-section" id="admin-membros">
+        <h3 style="font-family:'Playfair Display',serif;margin-bottom:16px;font-size:15px;color:var(--accent2)">Criar Membro</h3>
+        <div class="form-field">
+          <label>Nome</label>
+          <input type="text" id="new-member-name" placeholder="Nome completo">
         </div>
-
-        <div class="admin-card">
-          <div class="admin-card-title">📚 Sortear gênero</div>
-          <div class="genre-grid" id="genre-grid">
-            <div class="genre-chip">🌹 Romance</div>
-            <div class="genre-chip">🧙 Fantasia</div>
-            <div class="genre-chip">🔍 Suspense</div>
-            <div class="genre-chip">🕵️ Policial</div>
-            <div class="genre-chip">🚀 Ficção Científica</div>
-            <div class="genre-chip">💡 Autoajuda</div>
-            <div class="genre-chip">📜 Biografia</div>
-            <div class="genre-chip">😂💕 Comédia Romântica</div>
-            <div class="genre-chip">😂 Comédia</div>
-            <div class="genre-chip">🇧🇷 Literatura Brasileira</div>
-          </div>
-          <button class="btn btn-dark" onclick="sortearGenero()">🎲 Sortear gênero</button>
+        <div class="form-field">
+          <label>Username</label>
+          <input type="text" id="new-member-user" placeholder="usuario.sem.espacos" autocapitalize="none">
         </div>
-      </div>
-
-      <!-- TAB MEMBROS -->
-      <div id="admin-membros" class="admin-panel">
-        <!-- Sub-abas -->
-        <div style="display:flex;gap:8px;margin-bottom:16px">
-          <button class="admin-tab active" id="mtab-membros" onclick="switchMembrosTab('membros')" style="flex:1">👥 Membros</button>
-          <button class="admin-tab" id="mtab-pendentes" onclick="switchMembrosTab('pendentes')" style="flex:1;position:relative">
-            ⏳ Pendentes
-            <span id="pendentes-badge" class="notif-badge hidden" style="position:absolute;top:-6px;right:-6px">0</span>
-          </button>
-          <button class="admin-tab" id="mtab-adicionar" onclick="switchMembrosTab('adicionar')" style="flex:1">➕ Adicionar</button>
+        <div class="form-field">
+          <label>Senha</label>
+          <input type="password" id="new-member-pass" placeholder="Senha inicial">
         </div>
-
-        <!-- Painel membros -->
-        <div id="mpanel-membros" class="admin-card">
-          <div class="admin-card-title">👥 Membros do clube</div>
-          <div id="members-list"></div>
+        <div class="form-field">
+          <label>
+            <input type="checkbox" id="new-member-admin" style="margin-right:6px">
+            É administrador
+          </label>
         </div>
+        <button class="btn btn-primary" style="width:100%;margin-bottom:20px" onclick="createMember()">Criar Membro</button>
 
-        <!-- Painel pendentes -->
-        <div id="mpanel-pendentes" class="hidden">
-          <div class="admin-card">
-            <div class="admin-card-title">⏳ Solicitações pendentes</div>
-            <div id="pendentes-list"><div class="empty-state">Nenhuma solicitação pendente.</div></div>
-          </div>
-        </div>
-
-        <!-- Painel adicionar -->
-        <div id="mpanel-adicionar" class="hidden">
-          <div class="admin-card">
-            <div class="admin-card-title">➕ Adicionar membro</div>
-            <input class="form-input" id="new-member-name" placeholder="Nome completo" style="margin-bottom:10px">
-            <input class="form-input" id="new-member-username" placeholder="Usuário (ex: mariaalves)" autocapitalize="none" style="margin-bottom:10px">
-            <input class="form-input" id="new-member-pass" placeholder="Senha inicial" type="password" style="margin-bottom:10px">
-            <button class="btn btn-primary" onclick="createMember()">➕ Criar membro</button>
-          </div>
+        <div class="sep"></div>
+        <h3 style="font-family:'Playfair Display',serif;margin:16px 0;font-size:15px;color:var(--accent2)">Membros</h3>
+        <div id="members-list">
+          <div class="loading-spinner"><div class="spinner"></div></div>
         </div>
       </div>
     </div>
 
-    <!-- DETALHE DO LIVRO -->
-    <div id="screen-book-detail" class="screen">
-      <div class="book-detail-header" id="detail-header"></div>
-      <div id="detail-reviews"></div>
-    </div>
-  </div>
+  </div><!-- end main-content -->
 
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
-    <button class="nav-btn active" onclick="goTo('home')" id="nav-home">
-      <span class="nav-icon">📖</span>
-      <span>Início</span>
-    </button>
-    <button class="nav-btn" onclick="goTo('acervo')" id="nav-acervo">
-      <span class="nav-icon">📚</span>
-      <span>Acervo</span>
-    </button>
-    <button class="nav-btn" onclick="goTo('disc')" id="nav-disc">
-      <span class="nav-icon">💬</span>
-      <span>Discussão</span>
-    </button>
-    <button class="nav-btn" onclick="goTo('avaliar')" id="nav-avaliar">
-      <span class="nav-icon">⭐</span>
-      <span>Avaliar</span>
-    </button>
-    <button class="nav-btn hidden" onclick="goTo('admin')" id="nav-admin">
-      <span class="nav-icon">⚙️</span>
-      <span>Admin</span>
-    </button>
+    <div class="nav-item active" onclick="navTo('home')">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Home</div>
+    </div>
+    <div class="nav-item" onclick="navTo('acervo')">
+      <div class="nav-icon">📚</div>
+      <div class="nav-label">Acervo</div>
+    </div>
+    <div class="nav-item" onclick="navTo('avaliar')">
+      <div class="nav-icon">⭐</div>
+      <div class="nav-label">Avaliar</div>
+    </div>
+    <div class="nav-item" id="nav-admin" style="display:none" onclick="navTo('admin')">
+      <div class="nav-icon">⚙️</div>
+      <div class="nav-label">Admin</div>
+    </div>
   </div>
 </div>
 
-<!-- MODAL: Novo Tópico -->
-<div class="modal-overlay" id="modal-topic" onclick="closeModal('modal-topic')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <div class="modal-title">💬 Novo tópico de discussão</div>
-    <textarea class="form-input" id="new-topic-text" rows="4" placeholder="Escreva um assunto, pergunta ou reflexão sobre o livro do mês…"></textarea>
-    <button class="btn btn-primary mt-12" onclick="submitTopic()">Publicar tópico</button>
+<!-- PROFILE MENU -->
+<div class="profile-menu" id="profile-menu" onclick="closeProfileMenu(event)">
+  <div class="profile-menu-inner">
+    <div class="pm-user">
+      <div class="avatar" id="pm-avatar" style="width:44px;height:44px;font-size:16px"></div>
+      <div>
+        <div class="pm-name" id="pm-name"></div>
+        <div class="pm-username" id="pm-username"></div>
+        <div class="pm-role" id="pm-role"></div>
+      </div>
+    </div>
+    <button class="btn btn-danger" style="width:100%" onclick="doLogout()">Sair</button>
   </div>
 </div>
 
-<!-- MODAL: Alterar Senha -->
-<div class="modal-overlay" id="modal-senha" onclick="closeModal('modal-senha')">
-  <div class="modal" onclick="event.stopPropagation()">
+<!-- NEW TOPIC MODAL -->
+<div class="full-modal" id="modal-new-topic">
+  <div class="full-modal-header">
+    <button class="btn btn-ghost" style="padding:4px 8px" onclick="closeNewTopic()">←</button>
+    <div class="full-modal-title">Novo Tópico</div>
+  </div>
+  <div class="full-modal-body">
+    <div class="form-field">
+      <label>Título do tópico</label>
+      <input type="text" id="new-topic-title" placeholder="Ex: Achei o final surpreendente...">
+    </div>
+    <div class="form-field">
+      <label>Descrição</label>
+      <textarea class="textarea-field" id="new-topic-body" placeholder="Escreva sua discussão aqui..." style="min-height:120px"></textarea>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="submitTopic()">Publicar Tópico</button>
+  </div>
+</div>
+
+<!-- BOOK DETAIL MODAL -->
+<div class="modal-overlay" id="modal-book-detail" onclick="closeBookDetail(event)">
+  <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">🔑 Alterar senha</div>
-    <input type="password" id="nova-senha-input" class="form-input" placeholder="Nova senha (mínimo 6 caracteres)" style="margin-bottom:12px">
-    <button class="btn btn-primary" onclick="confirmarAlterarSenha()">Salvar nova senha</button>
+    <div class="modal-header">
+      <div class="modal-title" id="detail-title">Detalhes</div>
+      <button class="btn btn-ghost" onclick="closeBookDetailBtn()">✕</button>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-dialog" id="confirm-dialog">
+  <div class="confirm-box">
+    <h3 id="confirm-title">Confirmar</h3>
+    <p id="confirm-msg">Tem certeza?</p>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok-btn">Confirmar</button>
+    </div>
   </div>
 </div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- FIREBASE -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script>
+<!-- FIREBASE + APP SCRIPTS -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, query, where, orderBy, onSnapshot, getDocs, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCMdW9OiJ3NhdepnznfV4F1hpBoByu9_Zs",
@@ -1157,925 +1229,965 @@ const firebaseConfig = {
   projectId: "clube-do-livro-b1995",
   storageBucket: "clube-do-livro-b1995.firebasestorage.app",
   messagingSenderId: "563155965273",
-  appId: "1:563155965273:web:056a2f93dd65f3fb40a848"
+  appId: "1:563155965273:web:056a2f93dd65f3fb40a848",
+  measurementId: "G-PSFZ0QGX1Y"
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-// Timeout de segurança — se Firebase demorar, mostra login
-setTimeout(()=>{
-  const loading = document.getElementById('loading-screen');
-  if(loading && !loading.classList.contains('hidden')){
-    loading.style.opacity='0';
-    setTimeout(()=>{
-      loading.classList.add('hidden');
-      document.getElementById('login-screen').classList.remove('hidden');
-    },400);
+const GENRES = ['Romance','Fantasia','Suspense','Policial','Ficção Científica','Autoajuda','Biografia','Comédia Romântica','Comédia','Literatura Brasileira'];
+
+// STATE
+let currentUser = null;
+let currentUserData = null;
+let currentMonth = getThisMonth(); // YYYY-MM
+let currentBookData = null;
+let currentTopics = [];
+let currentTopicId = null;
+let currentReplies = [];
+let unsubTopics = null;
+let unsubReplies = null;
+let coverBase64 = null;
+let adminBookEditId = null;
+let sortFila = [];
+
+// HELPERS
+function getThisMonth() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+function monthLabel(ym) {
+  const [y,m] = ym.split('-');
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  return `${months[parseInt(m)-1]} ${y}`;
+}
+
+function makeAvatar(name, isAdmin=false) {
+  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  return `<div class="avatar${isAdmin?' admin':''}" style="width:30px;height:30px;font-size:11px">${initials}</div>`;
+}
+
+function timeAgo(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const diff = (Date.now() - d) / 1000;
+  if (diff < 60) return 'agora';
+  if (diff < 3600) return `${Math.floor(diff/60)}min`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h`;
+  return `${Math.floor(diff/86400)}d`;
+}
+
+function starsHtml(rating, size=16) {
+  let h = '<div class="stars">';
+  for (let i=1;i<=5;i++) {
+    h += `<span class="star ${i<=Math.round(rating)?'filled':'empty'}" style="font-size:${size}px">${i<=Math.round(rating)?'★':'☆'}</span>`;
   }
-}, 5000);
-const TS = firebase.firestore.FieldValue.serverTimestamp;
+  return h + '</div>';
+}
 
-// ─── STATE ───
-let currentUser = null, currentUserData = null, currentBook = null;
-let currentReview = null, reviewStars = 0, reviewChars = [], pendingCoverFile = null;
-let filaState = [], unsubTopics = null, homeDate = new Date();
+window.showToast = function(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  setTimeout(()=>t.className='toast',3000);
+};
 
-// ─── HELPERS ───
-const avatarColors = ['#7A2E3C','#5C7A5E','#C8852A','#4A6B8A','#6B4A8A','#8A6B4A','#3C6B7A','#7A6B3C'];
-function getAvatarColor(n){let h=0;for(let c of(n||''))h=(h*31+c.charCodeAt(0))&0xFFFF;return avatarColors[h%avatarColors.length];}
-function initials(n){return(n||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();}
-function makeAvatar(name,size=28){return`<div class="avatar" style="background:${getAvatarColor(name)};width:${size}px;height:${size}px;font-size:${Math.round(size*0.38)}px">${initials(name)}</div>`;}
-function timeAgo(ts){if(!ts)return'';const d=ts.toDate?ts.toDate():new Date(ts);const diff=(Date.now()-d)/1000;if(diff<60)return'agora';if(diff<3600)return`há ${Math.floor(diff/60)}min`;if(diff<86400)return`há ${Math.floor(diff/3600)}h`;if(diff<172800)return'ontem';return`${Math.floor(diff/86400)}d`;}
+window.showConfirm = function(title, msg, onOk) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-ok-btn').onclick = () => { closeConfirm(); onOk(); };
+  document.getElementById('confirm-dialog').classList.add('active');
+};
+window.closeConfirm = function() {
+  document.getElementById('confirm-dialog').classList.remove('active');
+};
 
-// ─── AUTH STATE ───
+// ===== AUTH =====
+window.doLogin = async function() {
+  const username = document.getElementById('login-user').value.trim().toLowerCase();
+  const pass = document.getElementById('login-pass').value;
+  const err = document.getElementById('auth-error');
+  err.style.display = 'none';
+  if (!username || !pass) { err.textContent = 'Preencha todos os campos.'; err.style.display='block'; return; }
+  try {
+    const email = `${username}@clubeleitura.app`;
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    err.textContent = 'Usuário ou senha incorretos.';
+    err.style.display = 'block';
+  }
+};
+
+window.doLogout = async function() {
+  closeProfileMenu();
+  await signOut(auth);
+};
+
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
 auth.onAuthStateChanged(async user => {
-  const loadingEl = document.getElementById('loading-screen');
-  loadingEl.style.opacity='0';
-  setTimeout(()=>loadingEl.classList.add('hidden'),400);
-  // Ignorar completamente se estiver no fluxo de cadastro
-  if(isCadastroFlow) return;
-
-  if(user){
-    currentUser=user;
-    const snap=await db.collection('users').doc(user.uid).get();
-    currentUserData=snap.exists?snap.data():{name:user.email,role:'member'};
-    if(currentUserData.role==='pendente'){
-      isCadastroFlow=true;
-      await auth.signOut();
-      isCadastroFlow=false;
-      document.getElementById('login-error').textContent='Sua solicitação ainda está aguardando aprovação do administrador.';
-      document.getElementById('login-error').style.display='block';
-      document.getElementById('login-screen').classList.remove('hidden');
-      document.getElementById('app').classList.add('hidden');
-      return;
+  if (user) {
+    // Load user data from Firestore
+    const snap = await getDoc(doc(db, 'members', user.uid));
+    if (snap.exists()) {
+      currentUser = user;
+      currentUserData = { uid: user.uid, ...snap.data() };
+      showApp();
+    } else {
+      await signOut(auth);
     }
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('setup-screen').classList.add('hidden');
-    startApp();
   } else {
-    if(skipAuthRedirect){ skipAuthRedirect=false; return; }
-    if(!document.getElementById('cadastro-sucesso-screen').classList.contains('hidden')) return;
-    document.getElementById('login-screen').classList.remove('hidden');
-    document.getElementById('app').classList.add('hidden');
+    currentUser = null;
+    currentUserData = null;
+    showAuth();
   }
 });
 
-// ─── SETUP ───
-window.doSetup=async function(){
-  const name=document.getElementById('setup-name').value.trim();
-  const username=document.getElementById('setup-username').value.trim().toLowerCase().replace(/\s+/g,'');
-  const pass=document.getElementById('setup-pass').value;
-  const errEl=document.getElementById('setup-error');
-  errEl.style.display='none';
-  if(!name||!username||!pass){errEl.textContent='Preencha todos os campos.';errEl.style.display='block';return;}
-  if(pass.length<6){errEl.textContent='Senha mínima de 6 caracteres.';errEl.style.display='block';return;}
-  const fakeEmail=`${username}@clubeleitura.app`;
-  try{
-    const cred=await auth.createUserWithEmailAndPassword(fakeEmail,pass);
-    await db.collection('users').doc(cred.user.uid).set({name,username,email:fakeEmail,role:'admin'});
-    await db.collection('usernames').doc(username).set({uid:cred.user.uid});
-    await db.collection('config').doc('appSetup').set({adminCreated:true});
-  }catch(e){errEl.textContent='Erro ao criar: '+e.message;errEl.style.display='block';}
+function showAuth() {
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+
+  // Setup topbar avatar
+  const av = document.getElementById('topbar-avatar');
+  const initials = currentUserData.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  av.textContent = initials;
+  if (currentUserData.isAdmin) av.classList.add('admin');
+
+  // Show admin tab if admin
+  if (currentUserData.isAdmin) document.getElementById('nav-admin').style.display = '';
+
+  // Init genre checkboxes
+  initGenreCheckboxes();
+
+  // Load home
+  navTo('home');
+}
+
+// ===== PROFILE MENU =====
+window.openProfileMenu = function() {
+  const initials = currentUserData.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('pm-avatar').textContent = initials;
+  if (currentUserData.isAdmin) document.getElementById('pm-avatar').classList.add('admin');
+  document.getElementById('pm-name').textContent = currentUserData.name;
+  document.getElementById('pm-username').textContent = `@${currentUserData.username}`;
+  const role = document.getElementById('pm-role');
+  role.textContent = currentUserData.isAdmin ? 'Administrador' : 'Membro';
+  role.className = `pm-role ${currentUserData.isAdmin?'tag tag-gold':'tag tag-purple'}`;
+  document.getElementById('profile-menu').classList.add('active');
 };
 
-// ─── LOGIN ───
-window.doLogin=async function(){
-  const username=document.getElementById('login-username').value.trim().toLowerCase().replace(/\s+/g,'');
-  const pass=document.getElementById('login-password').value;
-  const errEl=document.getElementById('login-error');
-  errEl.style.display='none';
-  if(!username||!pass){errEl.textContent='Preencha usuário e senha.';errEl.style.display='block';return;}
-  try{
-    const unSnap=await db.collection('usernames').doc(username).get();
-    if(!unSnap.exists){errEl.textContent='Usuário não encontrado.';errEl.style.display='block';return;}
-    await auth.signInWithEmailAndPassword(`${username}@clubeleitura.app`,pass);
-  }catch(e){errEl.textContent='Usuário ou senha incorretos.';errEl.style.display='block';}
+window.closeProfileMenu = function(e) {
+  if (!e || e.target === document.getElementById('profile-menu'))
+    document.getElementById('profile-menu').classList.remove('active');
 };
 
-window.toggleAvatarMenu=function(){
-  const menu=document.getElementById('avatar-menu');
-  menu.classList.toggle('hidden');
-  setTimeout(()=>{
-    document.addEventListener('click',function closeMenu(e){
-      const m=document.getElementById('avatar-menu');
-      const av=document.getElementById('header-avatar');
-      if(m&&!m.contains(e.target)&&av&&!av.contains(e.target)){
-        m.classList.add('hidden');
-        document.removeEventListener('click',closeMenu);
-      }
-    });
-  },100);
-};
+// ===== NAV =====
+let currentScreen = 'home';
+window.navTo = function(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
-window.doLogout=function(){
-  if(confirm('Sair do Clube Leitura?')){
-    auth.signOut().then(()=>{
-      document.getElementById('app').classList.add('hidden');
-      document.getElementById('login-screen').classList.remove('hidden');
-      document.getElementById('login-username').value='';
-      document.getElementById('login-password').value='';
+  document.getElementById(`screen-${screen}`).classList.add('active');
+  const navItems = document.querySelectorAll('.nav-item');
+  const navMap = { home:0, acervo:1, avaliar:2, admin:3 };
+  if (navMap[screen] !== undefined) {
+    const items = document.querySelectorAll('.nav-item:not([style*="none"])');
+    // active the right one
+    document.querySelectorAll('.nav-item').forEach(ni => {
+      if (ni.getAttribute('onclick')?.includes(`'${screen}'`)) ni.classList.add('active');
     });
   }
+
+  if (unsubTopics && screen !== 'home') { unsubTopics(); unsubTopics = null; }
+  if (unsubReplies) { unsubReplies(); unsubReplies = null; }
+
+  currentScreen = screen;
+
+  if (screen === 'home') loadHome();
+  if (screen === 'acervo') loadAcervo();
+  if (screen === 'avaliar') loadAvaliar();
+  if (screen === 'admin') loadAdmin();
 };
-window.confirmLogout=window.doLogout;
 
-// ─── START APP ───
-function populateYearSelects(){
-  const now=new Date(),year=now.getFullYear(),month=now.getMonth()+1;
-  const years=[year-1,year,year+1];
-  ['book-ano','del-ano','edit-ano','zero-ano'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');el.value=year;});
-  const m=document.getElementById('book-mes');if(m)m.value=String(month).padStart(2,'0');
-  const dm=document.getElementById('del-mes');if(dm)dm.value=String(month).padStart(2,'0');
-  const em=document.getElementById('edit-mes');if(em)em.value=String(month).padStart(2,'0');
-}
+window.goBack = function() {
+  navTo('home');
+};
 
-function startApp(){
-  document.getElementById('login-screen').classList.add('hidden');
-  document.getElementById('app').classList.remove('hidden');
-  const name=currentUserData.name||currentUser.email;
-  const av=document.getElementById('header-avatar');
-  av.textContent=initials(name);av.style.background=getAvatarColor(name);
-  const isAdmin=currentUserData.role==='admin';
-  if(isAdmin){document.getElementById('admin-pill').classList.remove('hidden');document.getElementById('nav-admin').classList.remove('hidden');populateYearSelects();}
-  loadHome();loadFila();
-  if(currentUserData.role==='admin')loadPendentes();
-}
-
-// ─── HOME ───
-async function loadHome(){await loadCurrentBook();loadTopics();}
-
-window.changeHomeMonth=function(delta){homeDate=new Date(homeDate.getFullYear(),homeDate.getMonth()+delta,1);loadHome();};
-function getHomeMonthId(){return`${homeDate.getFullYear()}-${String(homeDate.getMonth()+1).padStart(2,'0')}`;}
-function updateHomeMonthLabel(){
-  const months=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const now=new Date();
-  const isCurrent=homeDate.getMonth()===now.getMonth()&&homeDate.getFullYear()===now.getFullYear();
-  const el=document.getElementById('home-month-label');
-  if(el)el.textContent=`${months[homeDate.getMonth()]} ${homeDate.getFullYear()}${isCurrent?' · atual':''}`;
-  const btn=document.getElementById('btn-new-topic');if(btn)btn.style.display=isCurrent?'':'none';
-}
-
-async function loadCurrentBook(){
-  const monthId=getHomeMonthId();updateHomeMonthLabel();
-  const snap=await db.collection('books').doc(monthId).get();
-  currentBook=snap.exists?{id:monthId,...snap.data()}:null;
+// ===== HOME =====
+async function loadHome() {
   renderHero();
+  loadTopics();
 }
 
-function monthLabel(){
-  const months=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  return`${months[homeDate.getMonth()]} ${homeDate.getFullYear()}`;
-}
+async function renderHero() {
+  const hero = document.getElementById('home-hero');
+  const monthStr = `${currentMonth}-01`;
+  const snap = await getDoc(doc(db, 'books', currentMonth));
 
-function renderHero(target='home'){
-  const el=document.getElementById(target==='home'?'home-hero':'avaliar-hero');
-  if(!currentBook){el.innerHTML=`<div class="no-book-msg">Nenhum livro registrado este mês.</div>`;return;}
-  const b=currentBook;
-  const coverHtml=b.coverUrl?`<img src="${b.coverUrl}" class="book-cover" style="width:90px;height:130px">`:`<div class="book-cover book-cover-placeholder" style="width:90px;height:130px">📖</div>`;
-  const avg=b.avgStars?b.avgStars.toFixed(1):'—';
-  const count=b.reviewCount||0;
-  const starsHtml=[1,2,3,4,5].map(i=>`<span class="${i<=Math.round(b.avgStars||0)?'star-f':'star-e'}">★</span>`).join('');
-  el.innerHTML=`
-    <div class="month-badge">📅 ${monthLabel()}</div>
+  const nav = `
+    <div class="month-nav">
+      <button onclick="changeMonth(-1)">‹</button>
+      <div class="month-title">${monthLabel(currentMonth)}</div>
+      <button onclick="changeMonth(1)">›</button>
+    </div>`;
+
+  if (!snap.exists()) {
+    hero.innerHTML = nav + `
+      <div class="empty-month">
+        <span class="icon">📖</span>
+        <p>Nenhum livro cadastrado para este mês.</p>
+      </div>`;
+    currentBookData = null;
+    return;
+  }
+
+  const book = snap.data();
+  currentBookData = { id: snap.id, ...book };
+
+  // Rating
+  const ratingsSnap = await getDocs(collection(db, 'books', currentMonth, 'ratings'));
+  let totalStars = 0, ratingCount = 0;
+  ratingsSnap.forEach(r => { const d = r.data(); if(d.stars){ totalStars+=d.stars; ratingCount++; }});
+  const avgStars = ratingCount > 0 ? (totalStars/ratingCount).toFixed(1) : null;
+
+  const genresHtml = (book.genres||[]).map(g=>`<span class="badge-genre">${g}</span>`).join('');
+  const coverHtml = book.cover
+    ? `<img class="book-cover" src="${book.cover}" alt="${book.title}" onerror="this.style.display='none'">`
+    : `<div class="book-cover-placeholder">📕</div>`;
+
+  const ratingHtml = avgStars
+    ? `<div class="stars-row">${starsHtml(avgStars,15)}<span class="rating-info"><strong>${avgStars}</strong> (${ratingCount} aval.)</span></div>`
+    : `<div class="rating-info" style="font-size:12px;color:var(--muted);margin:8px 0">Sem avaliações ainda</div>`;
+
+  hero.innerHTML = nav + `
     <div class="book-hero">
-      ${coverHtml}
-      <div class="book-hero-info">
-        <div class="book-hero-title">${b.titulo}</div>
-        <div class="book-hero-author">${b.autor}</div>
-        <div class="book-hero-genre">${b.genero||''}</div>
-        <div class="chosen-by">Escolhido por <strong>${b.escolhidoPor||'—'}</strong></div>
-        <div class="stars-display">${starsHtml}<span class="stars-avg">${avg} · ${count} avaliações</span></div>
-        ${target==='home'?`<button class="btn btn-primary" onclick="goTo('avaliar')">✍️ Avaliar</button>`:''}
+      <div class="book-cover-wrap">${coverHtml}</div>
+      <div class="book-info">
+        <div>${genresHtml}</div>
+        <div class="book-title">${book.title}</div>
+        <div class="book-author">${book.author}</div>
+        ${ratingHtml}
+        ${book.chosenBy ? `<div class="book-chosen-by">Escolha de <span>${book.chosenBy}</span></div>` : ''}
+        <button class="btn btn-primary" style="margin-top:12px;padding:10px 16px;font-size:13px" onclick="navTo('avaliar')">⭐ Avaliar</button>
       </div>
     </div>`;
 }
 
-// ─── TOPICS ───
-function loadTopics(){
-  if(unsubTopics)unsubTopics();
-  if(!currentBook){document.getElementById('topics-list').innerHTML=`<div class="empty-state">Registre o livro do mês para abrir as discussões.</div>`;return;}
-  unsubTopics=db.collection('topics').where('bookId','==',currentBook.id).onSnapshot(snap=>{
-    const el=document.getElementById('topics-list');
-    if(snap.empty){el.innerHTML=`<div class="empty-state" style="padding:24px 20px">Nenhum tópico ainda. Seja o primeiro! 📝</div>`;return;}
-    const sortedDocs=[...snap.docs].sort((a,b)=>{const ta=a.data().createdAt?.toMillis?.()||0;const tb=b.data().createdAt?.toMillis?.()||0;return tb-ta;});
-    el.innerHTML=sortedDocs.map(d=>{
-      const t=d.data();const replies=t.replies?t.replies.length:0;
-      return`<div class="topic-card" onclick="openFullDisc()">
-        <div class="topic-meta">${makeAvatar(t.authorName)}<span class="topic-author-name">${t.authorName}</span><span class="topic-time">${timeAgo(t.createdAt)}</span></div>
-        <div class="topic-text">${t.text}</div>
-        ${replies?`<div class="topic-replies">↩ ${replies} resposta${replies>1?'s':''}</div>`:''}
-      </div>`;
-    }).join('');
-  });
-}
-
-window.openNewTopicModal=function(){
-  if(!currentBook){showToast('Nenhum livro registrado este mês.');return;}
-  document.getElementById('new-topic-text').value='';openModal('modal-topic');
+window.changeMonth = function(dir) {
+  const [y, m] = currentMonth.split('-').map(Number);
+  const d = new Date(y, m-1+dir, 1);
+  currentMonth = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  renderHero();
+  loadTopics();
 };
 
-window.submitTopic=async function(){
-  const text=document.getElementById('new-topic-text').value.trim();
-  if(!text){showToast('Escreva algo primeiro!');return;}
-  await db.collection('topics').add({bookId:currentBook.id,authorId:currentUser.uid,authorName:currentUserData.name||currentUser.email,text,replies:[],createdAt:TS()});
-  closeModal('modal-topic');showToast('Tópico publicado! 🎉');
-};
+function loadTopics() {
+  const list = document.getElementById('topics-list');
+  if (unsubTopics) unsubTopics();
 
-// ─── DISCUSSÃO COMPLETA ───
-window.openFullDisc=function(){goTo('disc');renderDiscHeader();loadFullTopics();};
+  const q = query(
+    collection(db, 'books', currentMonth, 'topics'),
+    orderBy('createdAt', 'desc')
+  );
 
-function renderDiscHeader(){
-  const el=document.getElementById('disc-header');
-  if(!currentBook){el.innerHTML='';return;}
-  const b=currentBook;
-  const coverHtml=b.coverUrl?`<img src="${b.coverUrl}" class="disc-cover">`:`<div class="disc-cover disc-cover-ph">📖</div>`;
-  el.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer" onclick="goTo('home')"><span style="color:rgba(255,255,255,0.4);font-size:13px">← Voltar</span></div>
-    <div class="disc-book-mini">${coverHtml}<div><div class="disc-title">${b.titulo}</div><div class="disc-author">${b.autor}</div></div></div>`;
-}
-
-function loadFullTopics(){
-  if(!currentBook)return;
-  const replyArea=document.getElementById('disc-reply-area');replyArea.style.display='block';
-  document.getElementById('reply-context').textContent=`Postar no livro: ${currentBook.titulo}`;
-  db.collection('topics').where('bookId','==',currentBook.id).onSnapshot(snap=>{
-    const el=document.getElementById('disc-topics');
-    if(snap.empty){el.innerHTML=`<div class="empty-state">Nenhum tópico ainda. Comece a discussão! 💬</div>`;return;}
-    const sortedTopics=[...snap.docs].sort((a,b)=>{const ta=a.data().createdAt?.toMillis?.()||0;const tb=b.data().createdAt?.toMillis?.()||0;return ta-tb;});
-    window._topicsMap={};
-    sortedTopics.forEach(d=>{window._topicsMap[d.id]=d.data();});
-    el.innerHTML=sortedTopics.map(d=>{
-      const t=d.data();
-      const isOwner=t.authorId===currentUser.uid||currentUserData.role==='admin';
-      const replies=(t.replies||[]).map((r,ri)=>{
-        const isReplyOwner=r.authorId===currentUser.uid||currentUserData.role==='admin';
-        return`<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(28,26,22,0.06);display:flex;gap:8px">
-          ${makeAvatar(r.authorName,24)}
-          <div style="flex:1">
-            <div style="font-size:11px;font-weight:500;color:var(--ink-light);margin-bottom:3px">${r.authorName}</div>
-            <div style="font-size:13px;color:var(--ink);line-height:1.5">${r.text}</div>
-            ${isReplyOwner?`<button style="font-size:10px;color:var(--burgundy);background:none;border:none;cursor:pointer;padding:0;margin-top:4px" data-action="del-reply" data-id="${d.id}" data-ri="${ri}">🗑️ excluir</button>`:''}
-          </div>
-        </div>`;
-      }).join('');
-      return`<div class="full-topic-card">
-        <div class="topic-meta">${makeAvatar(t.authorName)}<span class="topic-author-name">${t.authorName}</span><span class="topic-time">${timeAgo(t.createdAt)}</span>
-          ${isOwner?`<button style="font-size:10px;color:var(--burgundy);background:none;border:none;cursor:pointer;margin-left:auto;padding:0" data-action="del-topic" data-id="${d.id}">🗑️</button>`:''}
-        </div>
-        <div class="topic-text">${t.text}</div>
-        ${isOwner?`<button style="font-size:11px;color:var(--amber);background:none;border:none;cursor:pointer;margin-top:6px;padding:0" data-action="edit-topic" data-id="${d.id}">✏️ editar</button>`:''}
-        ${replies}
-        <button style="font-size:11px;color:var(--amber);background:none;border:none;cursor:pointer;margin-top:10px;padding:0;display:block" data-action="reply" data-id="${d.id}" data-preview="${t.text.slice(0,30)}">↩ Responder</button>
-      </div>`;
-    }).join('');
-  ;
-}
-
-let replyTargetId=null;
-window.focusReply=function(topicId,preview){replyTargetId=topicId;document.getElementById('reply-context').textContent=`Respondendo: "${preview}"`;document.getElementById('reply-input').focus();};
-
-// Event delegation para botões de tópico (evita problema com onclick em strings)
-document.addEventListener('click', function(e){
-  const btn=e.target.closest('[data-action]');
-  if(!btn)return;
-  const action=btn.dataset.action;
-  const id=btn.dataset.id;
-  if(action==='del-topic') deleteTopic(id);
-  else if(action==='edit-topic'){
-    const t=window._topicsMap&&window._topicsMap[id];
-    if(t) editTopic(id, t.text);
-  }
-  else if(action==='del-reply') deleteReply(id, parseInt(btn.dataset.ri));
-  else if(action==='reply') focusReply(id, btn.dataset.preview+'…');
-});
-
-window.postTopic=async function(){
-  const text=document.getElementById('reply-input').value.trim();
-  if(!text||!currentBook)return;
-  if(replyTargetId){
-    const ref=db.collection('topics').doc(replyTargetId);
-    const snap=await ref.get();
-    const replies=snap.data().replies||[];
-    replies.push({authorId:currentUser.uid,authorName:currentUserData.name||currentUser.email,text,at:new Date().toISOString()});
-    await ref.update({replies});
-    replyTargetId=null;document.getElementById('reply-context').textContent=`Postar no livro: ${currentBook.titulo}`;
-  }else{
-    await db.collection('topics').add({bookId:currentBook.id,authorId:currentUser.uid,authorName:currentUserData.name||currentUser.email,text,replies:[],createdAt:TS()});
-  }
-  document.getElementById('reply-input').value='';showToast('Publicado! ✅');
-};
-
-// ─── ACERVO ───
-async function loadAcervo(){
-  const snap=await db.collection('books').get();
-  const el=document.getElementById('acervo-list');
-  if(snap.empty){el.innerHTML=`<div class="empty-state">Nenhum livro no acervo ainda.</div>`;return;}
-  const books=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.id.localeCompare(a.id));
-  el.innerHTML=books.map(b=>{
-    const avg=b.avgStars?b.avgStars.toFixed(1):'—';
-    const coverHtml=b.coverUrl?`<img src="${b.coverUrl}" class="acervo-cover">`:`<div class="acervo-cover acervo-cover-ph">📖</div>`;
-    const starsHtml=[1,2,3,4,5].map(i=>`<span class="${i<=Math.round(b.avgStars||0)?'acervo-star-f':'acervo-star-e'}">★</span>`).join('');
-    return`<div class="acervo-card" onclick="openBookDetail('${b.id}')">
-      ${coverHtml}
-      <div class="acervo-info">
-        <div class="acervo-month">${b.id}</div>
-        <div class="acervo-title">${b.titulo}</div>
-        <div class="acervo-author">${b.autor}</div>
-        ${b.genero?`<div class="acervo-genre-tag">${b.genero}</div>`:''}
-        <div class="acervo-stars">${starsHtml}<span class="acervo-avg">${avg} · ${b.reviewCount||0} av.</span></div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ─── BOOK DETAIL ───
-window.openBookDetail=async function(bookId){
-  const snap=await db.collection('books').doc(bookId).get();
-  if(!snap.exists)return;
-  const b={id:bookId,...snap.data()};
-  goTo('book-detail');
-  const coverHtml=b.coverUrl?`<img src="${b.coverUrl}" class="book-detail-cover">`:`<div class="book-detail-cover book-detail-cover-ph">📖</div>`;
-  document.getElementById('detail-header').innerHTML=`
-    <div style="cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:16px" onclick="goTo('acervo')">← Acervo</div>
-    ${coverHtml}
-    <div class="book-detail-title">${b.titulo}</div>
-    <div class="book-detail-author">${b.autor}</div>
-    ${b.genero?`<div class="book-detail-genre">${b.genero}</div>`:''}
-    <div class="book-detail-meta">Escolhido por <strong>${b.escolhidoPor||'—'}</strong> · ${b.id}</div>`;
-  const revSnap=await db.collection('reviews').where('bookId','==',bookId).get();
-  const el=document.getElementById('detail-reviews');
-  if(revSnap.empty){el.innerHTML=`<div class="empty-state" style="padding:24px 16px">Nenhuma avaliação ainda.</div>`;return;}
-  el.innerHTML=`<div style="padding:16px 16px 4px"><div class="section-title">⭐ Avaliações</div></div>`+
-    revSnap.docs.map(d=>{
-      const r=d.data();
-      const starsHtml=[1,2,3,4,5].map(i=>`<span class="${i<=r.stars?'review-star-f':'review-star-e'}">★</span>`).join('');
-      const chars=(r.personagens||[]).map(c=>`<span class="char-pill">${c}</span>`).join('');
-      return`<div class="review-card">
-        <div class="review-header">${makeAvatar(r.authorName,32)}<div class="review-user"><div class="review-user-name">${r.authorName}</div><div class="review-stars">${starsHtml}</div></div></div>
-        ${r.personagens?.length?`<div class="review-field"><div class="review-field-label">Personagens</div><div class="char-pills">${chars}</div></div>`:''}
-        ${r.trecho?`<div class="review-field"><div class="review-field-label">Trecho favorito</div><div class="review-field-val" style="font-style:italic">"${r.trecho}"</div></div>`:''}
-        ${r.comentario?`<div class="review-field"><div class="review-field-label">Comentário</div><div class="review-field-val">${r.comentario}</div></div>`:''}
-      </div>`;
-    }).join('');
-};
-
-// ─── AVALIAR ───
-async function loadAvaliar(){
-  renderHero('avaliar');
-  reviewStars=0;reviewChars=[];
-  document.getElementById('trecho-input').value='';document.getElementById('comment-input').value='';
-  updateStarPicker();renderCharTags();
-  if(!currentBook)return;
-  const snap=await db.collection('reviews').doc(`${currentBook.id}_${currentUser.uid}`).get();
-  currentReview=snap.exists?snap.data():null;
-  if(currentReview){document.getElementById('already-reviewed-msg').classList.remove('hidden');document.getElementById('review-form').classList.add('hidden');}
-  else{document.getElementById('already-reviewed-msg').classList.add('hidden');document.getElementById('review-form').classList.remove('hidden');}
-  await loadAllReviews();
-}
-
-window.editReview=function(){
-  if(!currentReview)return;
-  reviewStars=currentReview.stars||0;reviewChars=[...(currentReview.personagens||[])];
-  document.getElementById('trecho-input').value=currentReview.trecho||'';document.getElementById('comment-input').value=currentReview.comentario||'';
-  updateStarPicker();renderCharTags();
-  document.getElementById('already-reviewed-msg').classList.add('hidden');document.getElementById('review-form').classList.remove('hidden');
-};
-
-window.pickStar=function(v){reviewStars=v;updateStarPicker();};
-function updateStarPicker(){document.querySelectorAll('.star-pick').forEach(s=>s.classList.toggle('on',parseInt(s.dataset.v)<=reviewStars));}
-window.addChar=function(){const inp=document.getElementById('char-input');const v=inp.value.trim();if(!v)return;reviewChars.push(v);inp.value='';renderCharTags();};
-window.charKeydown=function(e){if(e.key==='Enter'){e.preventDefault();addChar();}};
-window.removeChar=function(i){reviewChars.splice(i,1);renderCharTags();};
-function renderCharTags(){document.getElementById('char-tags').innerHTML=reviewChars.map((c,i)=>`<span class="char-tag">${c}<span class="char-tag-x" onclick="removeChar(${i})">×</span></span>`).join('');}
-
-window.submitReview=async function(){
-  if(!currentBook){showToast('Nenhum livro este mês.');return;}
-  if(!reviewStars){showToast('Selecione sua nota!');return;}
-  const trecho=document.getElementById('trecho-input').value.trim();
-  const comentario=document.getElementById('comment-input').value.trim();
-  const revId=`${currentBook.id}_${currentUser.uid}`;
-  await db.collection('reviews').doc(revId).set({bookId:currentBook.id,authorId:currentUser.uid,authorName:currentUserData.name||currentUser.email,stars:reviewStars,personagens:reviewChars,trecho,comentario,updatedAt:TS()});
-  const revSnap=await db.collection('reviews').where('bookId','==',currentBook.id).get();
-  const all=revSnap.docs.map(d=>d.data().stars);
-  const avg=all.reduce((a,b)=>a+b,0)/all.length;
-  await db.collection('books').doc(currentBook.id).update({avgStars:avg,reviewCount:all.length});
-  currentBook.avgStars=avg;currentBook.reviewCount=all.length;
-  showToast('Avaliação enviada! ⭐');loadAvaliar();renderHero('home');
-};
-
-window.deleteReview=async function(){
-  if(!currentBook||!currentReview)return;
-  if(!confirm('Excluir sua avaliação?'))return;
-  const revId=`${currentBook.id}_${currentUser.uid}`;
-  await db.collection('reviews').doc(revId).delete();
-  const revSnap=await db.collection('reviews').where('bookId','==',currentBook.id).get();
-  const all=revSnap.docs.map(d=>d.data().stars);
-  const avg=all.length?all.reduce((a,b)=>a+b,0)/all.length:0;
-  await db.collection('books').doc(currentBook.id).update({avgStars:avg,reviewCount:all.length});
-  currentBook.avgStars=avg;currentBook.reviewCount=all.length;
-  showToast('Avaliação excluída!');loadAvaliar();renderHero('home');
-};
-
-async function loadAllReviews(){
-  if(!currentBook){document.getElementById('all-reviews-list').innerHTML='';return;}
-  const snap=await db.collection('reviews').where('bookId','==',currentBook.id).get();
-  const el=document.getElementById('all-reviews-list');
-  if(snap.empty){el.innerHTML='<div class="empty-state">Nenhuma avaliação ainda.</div>';return;}
-  el.innerHTML=snap.docs.map(d=>{
-    const r=d.data();
-    const isMe=r.authorId===currentUser.uid;
-    const starsHtml=[1,2,3,4,5].map(i=>`<span class="${i<=r.stars?'review-star-f':'review-star-e'}">★</span>`).join('');
-    const chars=(r.personagens||[]).map(c=>`<span class="char-pill">${c}</span>`).join('');
-    return`<div class="review-card" style="margin-bottom:10px">
-      <div class="review-header">${makeAvatar(r.authorName,32)}
-        <div class="review-user">
-          <div class="review-user-name">${r.authorName}${isMe?' <span style="font-size:10px;color:var(--amber)">(você)</span>':''}</div>
-          <div class="review-stars">${starsHtml}</div>
-        </div>
-      </div>
-      ${r.personagens?.length?`<div class="review-field"><div class="review-field-label">Personagens</div><div class="char-pills">${chars}</div></div>`:''}
-      ${r.trecho?`<div class="review-field"><div class="review-field-label">Trecho favorito</div><div class="review-field-val" style="font-style:italic">"${r.trecho}"</div></div>`:''}
-      ${r.comentario?`<div class="review-field"><div class="review-field-label">Comentário</div><div class="review-field-val">${r.comentario}</div></div>`:''}
-    </div>`;
-  }).join('');
-}
-
-// ─── ADMIN LIVRO ───
-window.previewCover=function(e){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(ev){
-    const img=new Image();
-    img.onload=function(){
-      const canvas=document.createElement('canvas');const MAX=400;
-      let w=img.width,h=img.height;
-      if(w>h){if(w>MAX){h=h*MAX/w;w=MAX;}}else{if(h>MAX){w=w*MAX/h;h=MAX;}}
-      canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);
-      pendingCoverFile=canvas.toDataURL('image/jpeg',0.75);
-      document.getElementById('cover-preview').src=pendingCoverFile;
-      document.getElementById('cover-preview').classList.remove('hidden');
-      document.getElementById('upload-placeholder').classList.add('hidden');
-    };img.src=ev.target.result;
-  };reader.readAsDataURL(file);
-};
-
-// ─── Gênero chips ───
-window.toggleGenero=function(el){el.classList.toggle('selected');};
-function getGenerosSelected(){
-  return [...document.querySelectorAll('#genero-chips .genero-chip.selected')].map(c=>c.dataset.v).join(', ');
-}
-function clearGenerosSelected(){
-  document.querySelectorAll('#genero-chips .genero-chip').forEach(c=>c.classList.remove('selected'));
-}
-function setGenerosSelected(generoStr){
-  clearGenerosSelected();
-  if(!generoStr)return;
-  const vals=generoStr.split(', ');
-  document.querySelectorAll('#genero-chips .genero-chip').forEach(c=>{
-    if(vals.includes(c.dataset.v))c.classList.add('selected');
-  });
-}
-
-// ─── Escolhido chips ───
-let escolhidoSelecionado='';
-function renderEscolhidoList(members){
-  const el=document.getElementById('escolhido-list');
-  if(!el)return;
-  el.innerHTML=members.map(m=>`<div class="escolhido-chip ${escolhidoSelecionado===m?'selected':''}" onclick="selectEscolhido('${m}')">${m}</div>`).join('');
-}
-window.selectEscolhido=function(name){
-  escolhidoSelecionado=escolhidoSelecionado===name?'':name;
-  document.querySelectorAll('.escolhido-chip').forEach(c=>{
-    c.classList.toggle('selected', c.textContent===escolhidoSelecionado);
-  });
-};
-
-// ─── Editar livro ───
-let editingBookId=null;
-window.loadBookForEdit=async function(){
-  const mes=document.getElementById('edit-mes').value;
-  const ano=document.getElementById('edit-ano').value;
-  const monthId=`${ano}-${mes}`;
-  const snap=await db.collection('books').doc(monthId).get();
-  if(!snap.exists){showToast('Nenhum livro encontrado nesse mês.');return;}
-  const b=snap.data();
-  editingBookId=monthId;
-  // Preencher form
-  document.getElementById('book-mes').value=mes;
-  document.getElementById('book-ano').value=ano;
-  document.getElementById('book-titulo').value=b.titulo||'';
-  document.getElementById('book-autor').value=b.autor||'';
-  setGenerosSelected(b.genero||'');
-  escolhidoSelecionado=b.escolhidoPor||'';
-  document.querySelectorAll('.escolhido-chip').forEach(c=>{
-    c.classList.toggle('selected',c.textContent===escolhidoSelecionado);
-  });
-  if(b.coverUrl){
-    document.getElementById('cover-preview').src=b.coverUrl;
-    document.getElementById('cover-preview').classList.remove('hidden');
-    document.getElementById('upload-placeholder').classList.add('hidden');
-  }
-  document.getElementById('book-form-title').textContent='✏️ Editando livro';
-  document.getElementById('btn-register-book').textContent='💾 Salvar alterações';
-  document.getElementById('btn-cancel-edit').classList.remove('hidden');
-  // Scroll para o form
-  document.getElementById('book-form-title').scrollIntoView({behavior:'smooth'});
-  showToast(`Livro "${b.titulo}" carregado para edição!`);
-};
-
-window.cancelEditBook=function(){
-  editingBookId=null;
-  document.getElementById('book-titulo').value='';
-  document.getElementById('book-autor').value='';
-  clearGenerosSelected();
-  escolhidoSelecionado='';
-  document.querySelectorAll('.escolhido-chip').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('cover-preview').classList.add('hidden');
-  document.getElementById('upload-placeholder').classList.remove('hidden');
-  pendingCoverFile=null;
-  document.getElementById('book-form-title').textContent='📖 Registrar livro do mês';
-  document.getElementById('btn-register-book').textContent='➕ Registrar livro';
-  document.getElementById('btn-cancel-edit').classList.add('hidden');
-};
-
-window.registerBook=async function(){
-  const titulo=document.getElementById('book-titulo').value.trim();
-  const autor=document.getElementById('book-autor').value.trim();
-  const genero=getGenerosSelected();
-  const escolhidoPor=escolhidoSelecionado||'';
-  if(!titulo||!autor){showToast('Preencha título e autor.');return;}
-  if(!genero){showToast('Selecione pelo menos um gênero!');return;}
-  const mes=document.getElementById('book-mes').value;
-  const ano=document.getElementById('book-ano').value;
-  const monthId=`${ano}-${mes}`;
-  const coverUrl=pendingCoverFile||null;
-
-  if(editingBookId){
-    // Editar — preservar avgStars e reviewCount
-    const snap=await db.collection('books').doc(editingBookId).get();
-    const existing=snap.exists?snap.data():{};
-    await db.collection('books').doc(editingBookId).set({
-      titulo,autor,genero,escolhidoPor,
-      coverUrl: coverUrl||existing.coverUrl||null,
-      avgStars:existing.avgStars||0,
-      reviewCount:existing.reviewCount||0,
-      createdAt:existing.createdAt||TS()
-    });
-    if(currentBook&&currentBook.id===editingBookId){
-      currentBook={...currentBook,titulo,autor,genero,escolhidoPor,coverUrl:coverUrl||currentBook.coverUrl};
-      renderHero('home');
-    }
-    showToast(`Livro "${titulo}" atualizado! ✅`);
-    cancelEditBook();
-  } else {
-    await db.collection('books').doc(monthId).set({titulo,autor,genero,escolhidoPor,coverUrl,avgStars:0,reviewCount:0,createdAt:TS()});
-    currentBook={id:monthId,titulo,autor,genero,escolhidoPor,coverUrl,avgStars:0,reviewCount:0};
-    renderHero('home');
-    showToast(`Livro "${titulo}" registrado! 📖`);
-    clearGenerosSelected();
-    escolhidoSelecionado='';
-    document.getElementById('book-titulo').value='';document.getElementById('book-autor').value='';
-    document.getElementById('cover-preview').classList.add('hidden');document.getElementById('upload-placeholder').classList.remove('hidden');
-    pendingCoverFile=null;
-  }
-};
-
-window.zerarAvaliacoes=async function(){
-  const mes=document.getElementById('zero-mes').value;
-  const ano=document.getElementById('zero-ano').value;
-  const monthId=`${ano}-${mes}`;
-  const bookSnap=await db.collection('books').doc(monthId).get();
-  if(!bookSnap.exists){showToast('Nenhum livro encontrado nesse mês.');return;}
-  const titulo=bookSnap.data().titulo;
-  if(!confirm(`Zerar TODAS as avaliações de "${titulo}" (${mes}/${ano})? Isso não pode ser desfeito!`))return;
-  const revSnap=await db.collection('reviews').where('bookId','==',monthId).get();
-  for(const d of revSnap.docs)await db.collection('reviews').doc(d.id).delete();
-  await db.collection('books').doc(monthId).update({avgStars:0,reviewCount:0});
-  if(currentBook&&currentBook.id===monthId){
-    currentBook.avgStars=0;currentBook.reviewCount=0;
-    renderHero('home');
-  }
-  showToast(`Avaliações de "${titulo}" zeradas! ✅`);
-};
-
-window.deleteBook=async function(){
-  const mes=document.getElementById('del-mes').value;
-  const ano=document.getElementById('del-ano').value;
-  const monthId=`${ano}-${mes}`;
-  const snap=await db.collection('books').doc(monthId).get();
-  if(!snap.exists){showToast('Nenhum livro encontrado nesse mês.');return;}
-  const titulo=snap.data().titulo;
-  if(!confirm(`Apagar "${titulo}" (${mes}/${ano})? Isso também apaga as avaliações!`))return;
-  const revSnap=await db.collection('reviews').where('bookId','==',monthId).get();
-  for(const d of revSnap.docs)await db.collection('reviews').doc(d.id).delete();
-  const topSnap=await db.collection('topics').where('bookId','==',monthId).get();
-  for(const d of topSnap.docs)await db.collection('topics').doc(d.id).delete();
-  await db.collection('books').doc(monthId).delete();
-  if(currentBook&&currentBook.id===monthId){currentBook=null;renderHero('home');loadTopics();}
-  showToast(`"${titulo}" apagado com sucesso.`);
-};
-
-// ─── SORTEIO ───
-async function loadFila(){
-  const snap=await db.collection('config').doc('sorteio').get();
-  filaState=snap.exists?(snap.data().fila||[]):[];renderFila();
-}
-function renderFila(){document.getElementById('fila-chips').innerHTML=filaState.map(m=>`<div class="fila-chip ${m.done?'done':''}"><div class="fila-dot"></div>${m.name}</div>`).join('')||'<span style="font-size:12px;color:var(--ink-faint)">Fila vazia</span>';}
-
-window.sortearMembro=async function(){
-  const pending=filaState.filter(m=>!m.done);
-  if(!pending.length){showToast('Todos já foram sorteados! Reinicie a fila.');return;}
-  const chosen=pending[Math.floor(Math.random()*pending.length)];
-  filaState=filaState.map(m=>m.name===chosen.name?{...m,done:true}:m);
-  document.getElementById('sorteio-membro-result').textContent=`${chosen.name} ✨`;
-  await db.collection('config').doc('sorteio').set({fila:filaState});
-  renderFila();showToast(`${chosen.name} foi sorteado/a! 🎉`);
-};
-
-window.resetFila=async function(){
-  if(!confirm('Reiniciar a fila do sorteio?'))return;
-  filaState=filaState.map(m=>({...m,done:false}));
-  await db.collection('config').doc('sorteio').set({fila:filaState});
-  document.getElementById('sorteio-membro-result').textContent='—';renderFila();showToast('Fila reiniciada!');
-};
-
-const genres=['🌹 Romance','🧙 Fantasia','🔍 Suspense','🕵️ Policial','🚀 Ficção Científica','💡 Autoajuda','📜 Biografia','😂💕 Comédia Romântica','😂 Comédia','🇧🇷 Literatura Brasileira'];
-window.sortearGenero=function(){
-  const chips=document.querySelectorAll('#genre-grid .genre-chip');
-  chips.forEach(c=>c.classList.remove('picked'));
-  const idx=Math.floor(Math.random()*genres.length);
-  chips[idx].classList.add('picked');showToast(`Gênero sorteado: ${genres[idx]}`);
-};
-
-// ─── MEMBROS ───
-async function loadMembers(){
-  const snap=await db.collection('users').get();
-  const el=document.getElementById('members-list');
-  if(snap.empty){el.innerHTML='<div class="empty-state">Nenhum membro.</div>';return;}
-  const activeDocs=snap.docs.filter(d=>d.data().role!=='pendente');
-  el.innerHTML=activeDocs.map(d=>{
-    const u=d.data();const isMe=d.id===currentUser.uid;
-    return`<div class="member-row">
-      ${makeAvatar(u.name||u.username,32)}
-      <div class="member-info"><div class="member-name">${u.name||'—'}</div><div class="member-email">@${u.username||''}</div></div>
-      <span class="member-role ${u.role==='admin'?'admin':''}">${u.role==='admin'?'ADM':'membro'}</span>
-      ${!isMe?`<button class="member-del" onclick="deleteMember('${d.id}','${u.name}','${u.username}')">×</button>`:''}
-    </div>`;
-  }).join('');
-  // Popular lista "Escolhido por"
-  const allMemberNames=snap.docs.map(d=>d.data().name||d.data().username).filter(Boolean);
-  renderEscolhidoList(allMemberNames);
-
-  const allNames=snap.docs.map(d=>d.data().name||d.data().username).filter(Boolean);
-  const filaNames=filaState.map(f=>f.name);
-  const toAdd=allNames.filter(n=>!filaNames.includes(n));
-  if(toAdd.length){filaState=[...filaState,...toAdd.map(name=>({name,done:false}))];await db.collection('config').doc('sorteio').set({fila:filaState});renderFila();}
-}
-
-// ─── CADASTRO / PENDENTES ───
-window.showCadastro=function(){
-  document.getElementById('login-screen').classList.add('hidden');
-  document.getElementById('cadastro-screen').classList.remove('hidden');
-};
-window.showLogin=function(){
-  document.getElementById('cadastro-screen').classList.add('hidden');
-  document.getElementById('login-screen').classList.remove('hidden');
-};
-
-window.doCadastro=async function(){
-  const name=document.getElementById('cad-name').value.trim();
-  const nascimento=document.getElementById('cad-nascimento').value;
-  const email=document.getElementById('cad-email').value.trim();
-  const telefone=document.getElementById('cad-telefone').value.trim();
-  const username=document.getElementById('cad-username').value.trim().toLowerCase().replace(/\s+/g,'');
-  const pass=document.getElementById('cad-pass').value;
-  const errEl=document.getElementById('cad-error');
-  errEl.style.display='none';
-  if(!name||!username||!pass||!email){errEl.textContent='Preencha todos os campos obrigatórios.';errEl.style.display='block';return;}
-  if(pass.length<6){errEl.textContent='Senha mínima de 6 caracteres.';errEl.style.display='block';return;}
-
-  const btn=document.querySelector('#cadastro-screen .btn-primary');
-  if(btn){btn.disabled=true;btn.textContent='Enviando...';}
-
-  try{
-    // Checar username duplicado
-    const unSnap=await db.collection('usernames').doc(username).get();
-    if(unSnap.exists){
-      errEl.textContent='Este usuário já está em uso.';
-      errEl.style.display='block';
-      if(btn){btn.disabled=false;btn.textContent='Enviar solicitação';}
+  unsubTopics = onSnapshot(q, snap => {
+    currentTopics = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (currentTopics.length === 0) {
+      list.innerHTML = `<div class="empty-state"><span class="es-icon">💬</span><p>Nenhuma discussão ainda.<br>Seja o primeiro a abrir um tópico!</p></div>`;
       return;
     }
-
-    const fakeEmail=`${username}@clubeleitura.app`;
-
-    // Ativar flag - bloqueia TODO o onAuthStateChanged durante o cadastro
-    isCadastroFlow=true;
-
-    const cred=await auth.createUserWithEmailAndPassword(fakeEmail,pass);
-    const uid=cred.user.uid;
-
-    await db.collection('usernames').doc(username).set({uid});
-    await db.collection('users').doc(uid).set({
-      name,username,email,telefone,nascimento,
-      role:'pendente',
-      createdAt:TS()
-    });
-
-    await auth.signOut();
-
-    // Desativar flag DEPOIS do signOut
-    isCadastroFlow=false;
-
-    // Limpar form
-    ['cad-name','cad-nascimento','cad-email','cad-telefone','cad-username','cad-pass'].forEach(id=>document.getElementById(id).value='');
-    if(btn){btn.disabled=false;btn.textContent='Enviar solicitação';}
-
-    // Mostrar tela de sucesso
-    document.getElementById('cadastro-screen').classList.add('hidden');
-    document.getElementById('cadastro-sucesso-screen').classList.remove('hidden');
-
-  }catch(e){
-    isCadastroFlow=false;
-    errEl.textContent='Erro: '+e.message;
-    errEl.style.display='block';
-    if(btn){btn.disabled=false;btn.textContent='Enviar solicitação';}
-  }
-};
-
-window.switchMembrosTab=function(tab){
-  ['membros','pendentes','adicionar'].forEach(t=>{
-    document.getElementById(`mtab-${t}`).classList.toggle('active',t===tab);
-    document.getElementById(`mpanel-${t}`).classList.toggle('hidden',t!==tab);
+    list.innerHTML = currentTopics.map(t => `
+      <div class="topic-card" onclick="openTopic('${t.id}')">
+        <div class="tc-header">
+          ${makeAvatar(t.authorName||'?')}
+          <div class="tc-meta">
+            <div class="tc-user">${t.authorName}</div>
+            <div class="tc-time">${timeAgo(t.createdAt)}</div>
+          </div>
+          ${(currentUserData.isAdmin || t.authorId===currentUser.uid) ? `
+            <button class="btn btn-ghost" style="padding:4px 8px;font-size:18px;margin-left:auto" onclick="deleteTopic(event,'${t.id}')">🗑</button>
+          ` : ''}
+        </div>
+        <div class="tc-title">${t.title}</div>
+        <div class="tc-preview">${t.body||''}</div>
+        <div class="tc-footer">
+          <div class="tc-stat">💬 ${t.replyCount||0} respostas</div>
+        </div>
+      </div>`).join('');
+  }, err => {
+    list.innerHTML = `<div class="empty-state"><span class="es-icon">⚠️</span><p>Erro ao carregar discussões.</p></div>`;
   });
-  if(tab==='pendentes')loadPendentes();
-};
-
-async function loadPendentes(){
-  const snap=await db.collection('users').where('role','==','pendente').get();
-  const el=document.getElementById('pendentes-list');
-  const count=snap.size;
-  // Atualizar badges
-  const badge=document.getElementById('pendentes-badge');
-  const notifBadge=document.getElementById('notif-badge');
-  const bell=document.getElementById('notif-bell');
-  if(count>0){
-    badge.textContent=count;badge.classList.remove('hidden');
-    notifBadge.textContent=count;notifBadge.classList.remove('hidden');
-    bell.classList.remove('hidden');
-  }else{
-    badge.classList.add('hidden');notifBadge.classList.add('hidden');
-    bell.classList.add('hidden');
-  }
-  if(snap.empty){el.innerHTML='<div class="empty-state">Nenhuma solicitação pendente. 🎉</div>';return;}
-  el.innerHTML=snap.docs.map(d=>{
-    const u=d.data();
-    return`<div class="pendente-card">
-      <div class="pendente-info">
-        <div class="pendente-name">${u.name}</div>
-        <div class="pendente-detail">@${u.username} · ${u.email||'—'}</div>
-        <div class="pendente-detail">📱 ${u.telefone||'—'} · 🎂 ${u.nascimento||'—'}</div>
-      </div>
-      <div class="pendente-actions">
-        <button class="btn btn-primary btn-sm" onclick="aprovarMembro('${d.id}','${u.name}','${u.username}')">✅ Aprovar</button>
-        <button class="btn btn-danger btn-sm" onclick="rejeitarMembro('${d.id}','${u.name}','${u.username}')">❌ Rejeitar</button>
-      </div>
-    </div>`;
-  }).join('');
 }
 
-window.aprovarMembro=async function(uid,name,username){
-  try{
-    // 1. Atualizar role no users
-    await db.collection('users').doc(uid).update({role:'member'});
-    // 2. Garantir que usernames aponta para o uid correto
-    await db.collection('usernames').doc(username).set({uid});
-    showToast(`${name} aprovado! ✅`);
-    loadPendentes();loadMembers();
-  }catch(e){
-    showToast('Erro ao aprovar: '+e.message);
-    console.error(e);
-  }
+window.openTopic = function(topicId) {
+  const topic = currentTopics.find(t=>t.id===topicId);
+  if (!topic) return;
+  currentTopicId = topicId;
+
+  document.getElementById('discuss-title').textContent = topic.title;
+
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-discuss').classList.add('active');
+
+  loadReplies(topicId, topic);
 };
 
-window.rejeitarMembro=async function(uid,name,username){
-  if(!confirm(`Rejeitar e remover ${name}?`))return;
-  await db.collection('users').doc(uid).delete();
-  await db.collection('usernames').doc(username).delete();
-  showToast(`${name} removido.`);
-  loadPendentes();
-};
+function loadReplies(topicId, topic) {
+  const content = document.getElementById('discuss-content');
+  content.innerHTML = `
+    <div class="reply-card" style="background:var(--card2);border-color:rgba(192,132,252,0.2)">
+      <div class="rc-header">
+        ${makeAvatar(topic.authorName)}
+        <div>
+          <div style="font-weight:600;font-size:13px">${topic.authorName}</div>
+          <div style="font-size:11px;color:var(--muted)">${timeAgo(topic.createdAt)}</div>
+        </div>
+        ${(currentUserData.isAdmin || topic.authorId===currentUser.uid) ? `
+          <button class="btn btn-ghost" style="margin-left:auto;padding:4px 8px" onclick="deleteTopic(null,'${topicId}',true)">🗑</button>
+        ` : ''}
+      </div>
+      <div class="rc-text">${topic.body||''}</div>
+    </div>
+    <div class="divider">Respostas</div>
+    <div id="replies-inner"></div>`;
 
-window.createMember=async function(){
-  const name=document.getElementById('new-member-name').value.trim();
-  const username=document.getElementById('new-member-username').value.trim().toLowerCase().replace(/\s+/g,'');
-  const pass=document.getElementById('new-member-pass').value;
-  if(!name||!username||!pass){showToast('Preencha todos os campos.');return;}
-  const unSnap=await db.collection('usernames').doc(username).get();
-  if(unSnap.exists){showToast('Usuário já existe!');return;}
-  const fakeEmail=`${username}@clubeleitura.app`;
-  try{
-    const cred=await auth.createUserWithEmailAndPassword(fakeEmail,pass);
-    await db.collection('users').doc(cred.user.uid).set({name,username,email:fakeEmail,role:'member'});
-    await db.collection('usernames').doc(username).set({uid:cred.user.uid});
-    showToast(`${name} adicionado ao clube! ✅`);
-    document.getElementById('new-member-name').value='';document.getElementById('new-member-username').value='';document.getElementById('new-member-pass').value='';
-    loadMembers();
-  }catch(e){showToast('Erro: '+e.message);}
-};
+  if (unsubReplies) unsubReplies();
 
-window.deleteMember=async function(uid,name,username){
-  if(!confirm(`Remover ${name} do clube?`))return;
-  await db.collection('users').doc(uid).delete();
-  if(username)await db.collection('usernames').doc(username).delete();
-  filaState=filaState.filter(f=>f.name!==name);
-  await db.collection('config').doc('sorteio').set({fila:filaState});
-  loadMembers();renderFila();showToast(`${name} removido.`);
-};
+  const q = query(
+    collection(db, 'books', currentMonth, 'topics', topicId, 'replies'),
+    orderBy('createdAt', 'asc')
+  );
 
-// ─── TÓPICOS: editar, excluir, excluir resposta ───
-window.deleteTopic=async function(topicId){
-  if(!confirm('Excluir este tópico?'))return;
-  await db.collection('topics').doc(topicId).delete();
-  showToast('Tópico excluído.');
-};
-
-window.editTopic=function(topicId,currentText){
-  const newText=prompt('Editar tópico:',currentText);
-  if(!newText||newText===currentText)return;
-  db.collection('topics').doc(topicId).update({text:newText});
-  showToast('Tópico editado! ✅');
-};
-
-window.deleteReply=async function(topicId,replyIndex){
-  if(!confirm('Excluir esta resposta?'))return;
-  const ref=db.collection('topics').doc(topicId);
-  const snap=await ref.get();
-  const replies=snap.data().replies||[];
-  replies.splice(replyIndex,1);
-  await ref.update({replies});
-  showToast('Resposta excluída.');
-};
-
-// ─── ALTERAR SENHA ───
-window.alterarSenha=function(){
-  // Fechar menu
-  const menu=document.getElementById('avatar-menu');
-  if(menu)menu.classList.add('hidden');
-  // Mostrar modal de senha
-  document.getElementById('modal-senha').classList.add('open');
-  document.getElementById('nova-senha-input').value='';
-  document.getElementById('nova-senha-input').focus();
-};
-
-window.confirmarAlterarSenha=async function(){
-  const nova=document.getElementById('nova-senha-input').value;
-  if(!nova||nova.length<6){showToast('Senha mínima de 6 caracteres!');return;}
-  try{
-    await auth.currentUser.updatePassword(nova);
-    closeModal('modal-senha');
-    showToast('Senha alterada com sucesso! ✅');
-  }catch(e){
-    if(e.code==='auth/requires-recent-login'){
-      closeModal('modal-senha');
-      showToast('Faça logout e login novamente antes de alterar a senha.');
-    }else{
-      showToast('Erro: '+e.message);
+  unsubReplies = onSnapshot(q, snap => {
+    const inner = document.getElementById('replies-inner');
+    if (!inner) return;
+    const replies = snap.docs.map(d=>({id:d.id,...d.data()}));
+    if (replies.length===0) {
+      inner.innerHTML = `<div class="empty-state" style="padding:20px"><span class="es-icon" style="font-size:28px">💭</span><p>Nenhuma resposta ainda.</p></div>`;
+      return;
     }
-  }
-};
-
-// ─── NAVEGAÇÃO ───
-const navScreens=['home','acervo','disc','avaliar','admin','book-detail'];
-window.goTo=function(screen){
-  navScreens.forEach(s=>{
-    document.getElementById(`screen-${s}`).classList.toggle('active',s===screen);
-    const nav=document.getElementById(`nav-${s}`);if(nav)nav.classList.toggle('active',s===screen);
+    inner.innerHTML = replies.map(r=>`
+      <div class="reply-card">
+        <div class="rc-header">
+          ${makeAvatar(r.authorName)}
+          <div>
+            <div style="font-weight:600;font-size:13px">${r.authorName}</div>
+            <div style="font-size:11px;color:var(--muted)">${timeAgo(r.createdAt)}</div>
+          </div>
+          ${(currentUserData.isAdmin || r.authorId===currentUser.uid) ? `
+            <button class="btn btn-ghost" style="margin-left:auto;padding:4px 8px" onclick="deleteReply('${r.id}')">🗑</button>
+          ` : ''}
+        </div>
+        <div class="rc-text">${r.text}</div>
+      </div>`).join('');
   });
-  if(screen==='acervo')loadAcervo();
-  if(screen==='avaliar')loadAvaliar();
-  if(screen==='admin'){loadMembers();loadFila();}
-};
+}
 
-window.switchAdminTab=function(tab){
-  document.querySelectorAll('.admin-tab').forEach((t,i)=>{const tabs=['livro','sorteio','membros'];t.classList.toggle('active',tabs[i]===tab);});
-  document.querySelectorAll('.admin-panel').forEach(p=>{p.classList.toggle('active',p.id===`admin-${tab}`);});
-};
+window.sendReply = async function() {
+  const ta = document.getElementById('reply-textarea');
+  const text = ta.value.trim();
+  if (!text || !currentTopicId) return;
+  ta.value = '';
 
-// ─── MODAL & TOAST ───
-window.openModal=function(id){document.getElementById(id).classList.add('open');};
-window.closeModal=function(id){document.getElementById(id).classList.remove('open');};
-window.showToast=function(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);};
-
-</script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
+  try {
+    await addDoc(collection(db, 'books', currentMonth, 'topics', currentTopicId, 'replies'), {
+      text,
+      authorId: currentUser.uid,
+      authorName: currentUserData.name,
+      createdAt: serverTimestamp()
     });
+    // increment reply count
+    const topicRef = doc(db, 'books', currentMonth, 'topics', currentTopicId);
+    const tSnap = await getDoc(topicRef);
+    await updateDoc(topicRef, { replyCount: (tSnap.data().replyCount||0)+1 });
+  } catch(e) { showToast('Erro ao enviar.','error'); }
+};
+
+window.deleteReply = function(replyId) {
+  showConfirm('Excluir resposta','Tem certeza que deseja excluir esta resposta?', async () => {
+    await deleteDoc(doc(db, 'books', currentMonth, 'topics', currentTopicId, 'replies', replyId));
+    showToast('Resposta excluída.','success');
+  });
+};
+
+window.deleteTopic = function(e, topicId, goBackAfter=false) {
+  if(e) e.stopPropagation();
+  showConfirm('Excluir tópico','Excluir este tópico e todas as respostas?', async () => {
+    // Delete replies subcollection
+    const rSnap = await getDocs(collection(db, 'books', currentMonth, 'topics', topicId, 'replies'));
+    const batch = writeBatch(db);
+    rSnap.forEach(r => batch.delete(r.ref));
+    batch.delete(doc(db, 'books', currentMonth, 'topics', topicId));
+    await batch.commit();
+    showToast('Tópico excluído.','success');
+    if (goBackAfter) navTo('home');
+  });
+};
+
+// NEW TOPIC
+window.openNewTopic = function() {
+  if (!currentBookData) { showToast('Nenhum livro cadastrado neste mês.','error'); return; }
+  document.getElementById('new-topic-title').value = '';
+  document.getElementById('new-topic-body').value = '';
+  document.getElementById('modal-new-topic').classList.add('active');
+};
+window.closeNewTopic = function() {
+  document.getElementById('modal-new-topic').classList.remove('active');
+};
+window.submitTopic = async function() {
+  const title = document.getElementById('new-topic-title').value.trim();
+  const body = document.getElementById('new-topic-body').value.trim();
+  if (!title) { showToast('Digite um título.','error'); return; }
+  try {
+    await addDoc(collection(db, 'books', currentMonth, 'topics'), {
+      title, body,
+      authorId: currentUser.uid,
+      authorName: currentUserData.name,
+      replyCount: 0,
+      createdAt: serverTimestamp()
+    });
+    closeNewTopic();
+    showToast('Tópico criado!','success');
+  } catch(e) { showToast('Erro ao criar tópico.','error'); }
+};
+
+// ===== ACERVO =====
+async function loadAcervo() {
+  const grid = document.getElementById('acervo-grid');
+  grid.innerHTML = `<div class="loading-spinner" style="grid-column:1/-1"><div class="spinner"></div></div>`;
+
+  const snap = await getDocs(collection(db, 'books'));
+  const books = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.id.localeCompare(a.id));
+
+  if (books.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="es-icon">📚</span><p>Nenhum livro no acervo ainda.</p></div>`;
+    return;
   }
+
+  // Get ratings for each book
+  const booksWithRatings = await Promise.all(books.map(async b => {
+    const rSnap = await getDocs(collection(db,'books',b.id,'ratings'));
+    let total=0, count=0;
+    rSnap.forEach(r=>{ const d=r.data(); if(d.stars){ total+=d.stars; count++; }});
+    return { ...b, avgStars: count>0?(total/count).toFixed(1):null, ratingCount: count };
+  }));
+
+  grid.innerHTML = booksWithRatings.map(b => `
+    <div class="acervo-item" onclick="openBookDetail('${b.id}')">
+      ${b.cover
+        ? `<img class="acervo-cover" src="${b.cover}" alt="${b.title}" onerror="this.parentElement.querySelector('.acervo-cover').style.display='none'">`
+        : `<div class="acervo-cover-ph">📕</div>`}
+      <div class="acervo-info">
+        <div class="acervo-month">${monthLabel(b.id)}</div>
+        <div class="acervo-title">${b.title}</div>
+        ${b.avgStars ? `<div class="acervo-stars">★ ${b.avgStars}</div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+window.openBookDetail = async function(bookId) {
+  const snap = await getDoc(doc(db,'books',bookId));
+  if (!snap.exists()) return;
+  const book = snap.data();
+
+  const rSnap = await getDocs(collection(db,'books',bookId,'ratings'));
+  let ratings = [];
+  rSnap.forEach(r=>ratings.push({id:r.id,...r.data()}));
+  let total=0;
+  ratings.forEach(r=>{ if(r.stars) total+=r.stars; });
+  const avg = ratings.length>0?(total/ratings.length).toFixed(1):null;
+
+  document.getElementById('detail-title').textContent = book.title;
+
+  const genresHtml = (book.genres||[]).map(g=>`<span class="badge-genre">${g}</span>`).join('');
+  const coverHtml = book.cover
+    ? `<img src="${book.cover}" style="width:80px;height:118px;object-fit:cover;border-radius:6px;box-shadow:var(--shadow)" onerror="this.style.display='none'">`
+    : `<div style="width:80px;height:118px;background:var(--card);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:32px">📕</div>`;
+
+  const ratingsHtml = ratings.length > 0
+    ? ratings.map(r=>`
+        <div class="avaliacao-card">
+          <div class="av-header">
+            ${makeAvatar(r.memberName||'?')}
+            <div class="av-name">${r.memberName}</div>
+            <div class="av-date">${timeAgo(r.createdAt)}</div>
+          </div>
+          <div class="av-stars">${starsHtml(r.stars)}</div>
+          ${r.characters ? `<div class="av-personagens">Personagens favoritos: <span>${r.characters}</span></div>` : ''}
+          ${r.excerpt ? `<div class="av-trecho">${r.excerpt}</div>` : ''}
+          ${r.comment ? `<div class="av-comment">${r.comment}</div>` : ''}
+        </div>`).join('')
+    : `<div class="empty-state"><span class="es-icon">⭐</span><p>Nenhuma avaliação ainda.</p></div>`;
+
+  document.getElementById('detail-body').innerHTML = `
+    <div style="display:flex;gap:14px;margin-bottom:16px">
+      ${coverHtml}
+      <div style="flex:1;min-width:0">
+        <div>${genresHtml}</div>
+        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:900;margin:6px 0 4px">${book.title}</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:8px">${book.author}</div>
+        ${avg ? `<div class="stars-row">${starsHtml(avg,14)}<span style="font-size:12px;color:var(--gold)">${avg} (${ratings.length})</span></div>` : ''}
+        ${book.chosenBy ? `<div style="font-size:12px;color:var(--muted);margin-top:6px">Escolha de <span style="color:var(--accent2)">${book.chosenBy}</span></div>` : ''}
+      </div>
+    </div>
+    <div class="divider">Avaliações</div>
+    ${ratingsHtml}
+    ${currentUserData.isAdmin ? `
+      <div style="margin-top:16px;display:flex;gap:8px">
+        <button class="btn btn-danger" style="flex:1;font-size:12px" onclick="zerarAvaliacoes('${bookId}')">🗑 Zerar Avaliações</button>
+        <button class="btn btn-danger" style="flex:1;font-size:12px" onclick="deleteBook('${bookId}')">🗑 Apagar Livro</button>
+      </div>` : ''}`;
+
+  document.getElementById('modal-book-detail').classList.add('active');
+};
+
+window.closeBookDetail = function(e) {
+  if (e.target === document.getElementById('modal-book-detail'))
+    document.getElementById('modal-book-detail').classList.remove('active');
+};
+window.closeBookDetailBtn = function() {
+  document.getElementById('modal-book-detail').classList.remove('active');
+};
+
+window.zerarAvaliacoes = function(bookId) {
+  showConfirm('Zerar Avaliações','Isso vai excluir TODAS as avaliações deste livro.', async () => {
+    const rSnap = await getDocs(collection(db,'books',bookId,'ratings'));
+    const batch = writeBatch(db);
+    rSnap.forEach(r => batch.delete(r.ref));
+    await batch.commit();
+    document.getElementById('modal-book-detail').classList.remove('active');
+    showToast('Avaliações zeradas.','success');
+  });
+};
+
+window.deleteBook = function(bookId) {
+  showConfirm('Apagar Livro','Isso vai apagar o livro, avaliações e discussões.', async () => {
+    // delete ratings
+    const rSnap = await getDocs(collection(db,'books',bookId,'ratings'));
+    const batch = writeBatch(db);
+    rSnap.forEach(r => batch.delete(r.ref));
+    // delete topics (shallow – ideally Cloud Function for deep delete)
+    const tSnap = await getDocs(collection(db,'books',bookId,'topics'));
+    tSnap.forEach(t => batch.delete(t.ref));
+    batch.delete(doc(db,'books',bookId));
+    await batch.commit();
+    document.getElementById('modal-book-detail').classList.remove('active');
+    loadAcervo();
+    showToast('Livro apagado.','success');
+  });
+};
+
+// ===== AVALIAR =====
+async function loadAvaliar() {
+  const content = document.getElementById('avaliar-content');
+  content.innerHTML = `<div class="loading-spinner"><div class="spinner"></div></div>`;
+
+  // Load current month book
+  const bookSnap = await getDoc(doc(db,'books',currentMonth));
+
+  if (!bookSnap.exists()) {
+    content.innerHTML = `<div class="empty-state"><span class="es-icon">📖</span><p>Nenhum livro cadastrado para ${monthLabel(currentMonth)}.</p></div>`;
+    return;
+  }
+
+  const book = bookSnap.data();
+
+  // Check existing rating
+  const myRatingSnap = await getDoc(doc(db,'books',currentMonth,'ratings',currentUser.uid));
+  const myRating = myRatingSnap.exists() ? myRatingSnap.data() : null;
+
+  // All ratings
+  const allSnap = await getDocs(collection(db,'books',currentMonth,'ratings'));
+  let allRatings = [];
+  allSnap.forEach(r => allRatings.push({id:r.id,...r.data()}));
+
+  const genresHtml = (book.genres||[]).map(g=>`<span class="badge-genre">${g}</span>`).join('');
+
+  content.innerHTML = `
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;padding:16px;background:var(--card);border-radius:var(--radius);border:1px solid var(--border)">
+      ${book.cover
+        ? `<img src="${book.cover}" style="width:60px;height:88px;object-fit:cover;border-radius:4px;flex-shrink:0" onerror="this.style.display='none'">`
+        : `<div style="width:60px;height:88px;background:var(--card2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">📕</div>`}
+      <div>
+        ${genresHtml}
+        <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:16px;margin:4px 0 2px">${book.title}</div>
+        <div style="font-size:13px;color:var(--muted)">${book.author}</div>
+      </div>
+    </div>
+
+    <div id="my-rating-form">
+      <h3 style="font-family:'Playfair Display',serif;font-size:16px;margin-bottom:12px">${myRating ? 'Sua avaliação' : 'Avaliar livro'}</h3>
+      <div class="star-picker" id="star-picker">
+        ${[1,2,3,4,5].map(i=>`<span class="sp-star ${myRating&&myRating.stars>=i?'active':''}" onclick="setStars(${i})">★</span>`).join('')}
+      </div>
+      <input type="hidden" id="selected-stars" value="${myRating?.stars||0}">
+
+      <div class="form-field" style="margin-top:12px">
+        <label>Personagens favoritos</label>
+        <input type="text" id="av-chars" placeholder="Ex: Elizabeth Bennet, Darcy..." value="${myRating?.characters||''}">
+      </div>
+      <div class="form-field">
+        <label>Trecho favorito</label>
+        <textarea class="textarea-field" id="av-excerpt" placeholder="Seu trecho favorito do livro...">${myRating?.excerpt||''}</textarea>
+      </div>
+      <div class="form-field">
+        <label>Comentário</label>
+        <textarea class="textarea-field" id="av-comment" placeholder="O que você achou do livro?">${myRating?.comment||''}</textarea>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" style="flex:1" onclick="submitRating()">
+          ${myRating ? '💾 Atualizar' : '⭐ Avaliar'}
+        </button>
+        ${myRating ? `<button class="btn btn-danger" onclick="deleteRating()">🗑</button>` : ''}
+      </div>
+    </div>
+
+    <div class="divider" style="margin:20px 0">Avaliações dos membros</div>
+    <div id="all-ratings-list">
+      ${allRatings.length === 0
+        ? `<div class="empty-state"><span class="es-icon">⭐</span><p>Nenhuma avaliação ainda.</p></div>`
+        : allRatings.map(r=>`
+          <div class="avaliacao-card">
+            <div class="av-header">
+              ${makeAvatar(r.memberName||'?')}
+              <div class="av-name">${r.memberName}</div>
+              <div class="av-date">${timeAgo(r.createdAt)}</div>
+            </div>
+            <div class="av-stars">${starsHtml(r.stars)}</div>
+            ${r.characters ? `<div class="av-personagens">Personagens favoritos: <span>${r.characters}</span></div>` : ''}
+            ${r.excerpt ? `<div class="av-trecho">${r.excerpt}</div>` : ''}
+            ${r.comment ? `<div class="av-comment">${r.comment}</div>` : ''}
+          </div>`).join('')}
+    </div>`;
+}
+
+window.setStars = function(n) {
+  document.getElementById('selected-stars').value = n;
+  document.querySelectorAll('.sp-star').forEach((s,i) => {
+    s.classList.toggle('active', i<n);
+  });
+};
+
+window.submitRating = async function() {
+  const stars = parseInt(document.getElementById('selected-stars').value);
+  if (!stars) { showToast('Selecione uma estrela.','error'); return; }
+
+  const data = {
+    stars,
+    characters: document.getElementById('av-chars').value.trim(),
+    excerpt: document.getElementById('av-excerpt').value.trim(),
+    comment: document.getElementById('av-comment').value.trim(),
+    memberId: currentUser.uid,
+    memberName: currentUserData.name,
+    createdAt: serverTimestamp()
+  };
+
+  try {
+    await setDoc(doc(db,'books',currentMonth,'ratings',currentUser.uid), data);
+    showToast('Avaliação salva!','success');
+    loadAvaliar();
+  } catch(e) { showToast('Erro ao salvar.','error'); }
+};
+
+window.deleteRating = function() {
+  showConfirm('Excluir avaliação','Tem certeza que deseja excluir sua avaliação?', async () => {
+    await deleteDoc(doc(db,'books',currentMonth,'ratings',currentUser.uid));
+    showToast('Avaliação excluída.','success');
+    loadAvaliar();
+  });
+};
+
+// ===== ADMIN =====
+function loadAdmin() {
+  if (!currentUserData.isAdmin) return;
+  loadAdminBook();
+  loadMembersList();
+  loadFila();
+  loadAdminMembersSelect();
+}
+
+function initGenreCheckboxes() {
+  const container = document.getElementById('genre-checkboxes');
+  if (!container) return;
+  container.innerHTML = GENRES.map(g=>`
+    <label class="genre-cb" onclick="toggleGenre(this)">
+      <input type="checkbox" value="${g}">${g}
+    </label>`).join('');
+}
+
+window.toggleGenre = function(el) {
+  el.classList.toggle('checked');
+  el.querySelector('input').checked = el.classList.contains('checked');
+};
+
+function getSelectedGenres() {
+  return Array.from(document.querySelectorAll('#genre-checkboxes input:checked')).map(i=>i.value);
+}
+
+async function loadAdminMembersSelect() {
+  const sel = document.getElementById('adm-escolhido');
+  const snap = await getDocs(collection(db,'members'));
+  const members = snap.docs.map(d=>d.data());
+  sel.innerHTML = '<option value="">Selecionar membro...</option>' +
+    members.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
+}
+
+async function loadAdminBook() {
+  const snap = await getDoc(doc(db,'books',currentMonth));
+  const section = document.getElementById('admin-book-current');
+
+  // Set month input
+  document.getElementById('adm-mes').value = currentMonth;
+
+  if (!snap.exists()) {
+    // Reset form
+    document.getElementById('adm-titulo').value = '';
+    document.getElementById('adm-autor').value = '';
+    document.getElementById('adm-capa-url').value = '';
+    document.getElementById('adm-capa-preview').style.display = 'none';
+    document.querySelectorAll('#genre-checkboxes .genre-cb').forEach(el=>{
+      el.classList.remove('checked');
+      el.querySelector('input').checked = false;
+    });
+    adminBookEditId = null;
+    section.innerHTML = '';
+    return;
+  }
+
+  const book = snap.data();
+  adminBookEditId = snap.id;
+
+  document.getElementById('adm-titulo').value = book.title||'';
+  document.getElementById('adm-autor').value = book.author||'';
+  document.getElementById('adm-capa-url').value = book.cover||'';
+  if (book.cover) {
+    const prev = document.getElementById('adm-capa-preview');
+    prev.src = book.cover;
+    prev.style.display = 'block';
+  }
+
+  // Set genres
+  document.querySelectorAll('#genre-checkboxes .genre-cb').forEach(el=>{
+    const val = el.querySelector('input').value;
+    const checked = (book.genres||[]).includes(val);
+    el.classList.toggle('checked', checked);
+    el.querySelector('input').checked = checked;
+  });
+
+  // Set chosen by
+  setTimeout(()=>{
+    const sel = document.getElementById('adm-escolhido');
+    if (sel && book.chosenBy) sel.value = book.chosenBy;
+  }, 300);
+
+  section.innerHTML = `<div style="font-size:12px;color:var(--success);padding:8px;background:rgba(74,222,128,0.1);border-radius:6px;border:1px solid rgba(74,222,128,0.2)">✓ Livro cadastrado: <strong>${book.title}</strong></div>`;
+}
+
+window.saveBook = async function() {
+  const mes = document.getElementById('adm-mes').value;
+  const titulo = document.getElementById('adm-titulo').value.trim();
+  const autor = document.getElementById('adm-autor').value.trim();
+  const generos = getSelectedGenres();
+  const escolhido = document.getElementById('adm-escolhido').value;
+  let cover = document.getElementById('adm-capa-url').value.trim();
+
+  if (!mes || !titulo || !autor) { showToast('Preencha mês, título e autor.','error'); return; }
+
+  // If there's a file upload
+  if (coverBase64) {
+    try {
+      const storageRef = ref(storage, `covers/${mes}.jpg`);
+      const blob = await fetch(coverBase64).then(r=>r.blob());
+      await uploadBytes(storageRef, blob);
+      cover = await getDownloadURL(storageRef);
+    } catch(e) { console.log('Upload error:', e); }
+  }
+
+  const data = {
+    title: titulo,
+    author: autor,
+    genres: generos,
+    chosenBy: escolhido || null,
+    cover: cover || null,
+    month: mes,
+    updatedAt: serverTimestamp()
+  };
+
+  try {
+    await setDoc(doc(db,'books',mes), data, { merge: true });
+    currentMonth = mes;
+    showToast('Livro salvo!','success');
+    loadAdminBook();
+  } catch(e) { showToast('Erro ao salvar.','error'); console.log(e); }
+};
+
+window.previewCover = function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    coverBase64 = e.target.result;
+    const prev = document.getElementById('adm-capa-preview');
+    prev.src = coverBase64;
+    prev.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+};
+
+window.switchAdminTab = function(tab) {
+  document.querySelectorAll('.admin-tab').forEach((t,i) => {
+    const tabs = ['livro','sorteio','membros'];
+    t.classList.toggle('active', tabs[i]===tab);
+  });
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`admin-${tab}`).classList.add('active');
+
+  if (tab==='membros') loadMembersList();
+  if (tab==='sorteio') loadFila();
+};
+
+// MEMBERS
+async function loadMembersList() {
+  const list = document.getElementById('members-list');
+  const snap = await getDocs(collection(db,'members'));
+  const members = snap.docs.map(d=>({uid:d.id,...d.data()}));
+
+  if (members.length === 0) {
+    list.innerHTML = `<div class="empty-state"><span class="es-icon">👥</span><p>Nenhum membro.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = members.map(m=>`
+    <div class="member-row">
+      ${makeAvatar(m.name, m.isAdmin)}
+      <div class="member-info">
+        <div class="m-name">${m.name}</div>
+        <div class="m-user">@${m.username}</div>
+      </div>
+      <span class="member-badge ${m.isAdmin?'admin':'member'}">${m.isAdmin?'ADM':'Membro'}</span>
+      ${m.uid !== currentUser.uid ? `<button class="btn btn-danger" style="padding:6px 10px;font-size:12px" onclick="deleteMember('${m.uid}','${m.username}')">🗑</button>` : ''}
+    </div>`).join('');
+}
+
+window.createMember = async function() {
+  const name = document.getElementById('new-member-name').value.trim();
+  const username = document.getElementById('new-member-user').value.trim().toLowerCase();
+  const pass = document.getElementById('new-member-pass').value;
+  const isAdmin = document.getElementById('new-member-admin').checked;
+
+  if (!name || !username || !pass) { showToast('Preencha todos os campos.','error'); return; }
+  if (pass.length < 6) { showToast('Senha mínima: 6 caracteres.','error'); return; }
+
+  try {
+    const email = `${username}@clubeleitura.app`;
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await setDoc(doc(db,'members',cred.user.uid), {
+      name, username, email, isAdmin,
+      createdAt: serverTimestamp()
+    });
+    // Sign back in as current admin (Firebase auto-signs in the new user)
+    // This is a known limitation — in production use Admin SDK
+    showToast(`Membro @${username} criado! Faça login novamente se necessário.`,'success');
+    document.getElementById('new-member-name').value = '';
+    document.getElementById('new-member-user').value = '';
+    document.getElementById('new-member-pass').value = '';
+    document.getElementById('new-member-admin').checked = false;
+    loadMembersList();
+  } catch(e) {
+    if (e.code === 'auth/email-already-in-use') showToast('Username já existe.','error');
+    else showToast('Erro ao criar membro.','error');
+    console.log(e);
+  }
+};
+
+window.deleteMember = function(uid, username) {
+  showConfirm('Excluir Membro', `Excluir @${username}? Isso não remove o login Firebase (faça via console).`, async () => {
+    await deleteDoc(doc(db,'members',uid));
+    loadMembersList();
+    showToast('Membro removido.','success');
+  });
+};
+
+// SORTEIO
+async function loadFila() {
+  const snap = await getDoc(doc(db,'config','sorteio'));
+  sortFila = snap.exists() ? (snap.data().fila||[]) : [];
+  renderFila();
+}
+
+function renderFila() {
+  const list = document.getElementById('fila-list');
+  if (!list) return;
+  if (sortFila.length === 0) {
+    list.innerHTML = `<p style="font-size:13px;color:var(--muted)">Fila vazia.</p>`;
+    return;
+  }
+  list.innerHTML = sortFila.map((m,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:12px;color:var(--muted);width:16px">${i+1}</span>
+      ${makeAvatar(m)}
+      <span style="font-size:13px;font-weight:500">${m}</span>
+      ${i===0 ? `<span class="tag tag-gold" style="margin-left:auto">Próximo</span>` : ''}
+    </div>`).join('');
+}
+
+window.sortearMembro = async function() {
+  if (sortFila.length === 0) {
+    // Build fila from members
+    const snap = await getDocs(collection(db,'members'));
+    const names = snap.docs.map(d=>d.data().name);
+    sortFila = shuffleArray([...names]);
+  }
+
+  const chosen = sortFila[0];
+  document.getElementById('sorteio-membro-result').innerHTML = `
+    <div class="sorteio-result">
+      <div class="sr-label">Próximo a escolher</div>
+      <div class="sr-value">${chosen}</div>
+    </div>`;
+
+  // Rotate fila
+  sortFila = [...sortFila.slice(1), chosen];
+  await setDoc(doc(db,'config','sorteio'), { fila: sortFila, updatedAt: serverTimestamp() });
+  renderFila();
+};
+
+window.sortearGenero = function() {
+  const genero = GENRES[Math.floor(Math.random()*GENRES.length)];
+  document.getElementById('sorteio-genero-result').innerHTML = `
+    <div class="sorteio-result">
+      <div class="sr-label">Gênero sorteado</div>
+      <div class="sr-value">${genero}</div>
+    </div>`;
+};
+
+window.resetFila = function() {
+  showConfirm('Reiniciar Fila','Isso vai reiniciar a fila de sorteio do zero.', async () => {
+    sortFila = [];
+    await setDoc(doc(db,'config','sorteio'), { fila: [], updatedAt: serverTimestamp() });
+    renderFila();
+    showToast('Fila reiniciada.','success');
+  });
+};
+
+function shuffleArray(arr) {
+  for (let i=arr.length-1;i>0;i--) {
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
 </script>
-	<script type="module" src="/app.js"></script>
+
 </body>
 </html>

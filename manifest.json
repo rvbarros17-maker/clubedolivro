@@ -1,12 +1,12 @@
 {
-  "name": "Clube Leitura",
-  "short_name": "ClubeLeitura",
-  "description": "O app do seu clube do livro",
+  "name": "Leitores Fofoqueiros",
+  "short_name": "Leitores",
+  "description": "Clube do livro — Leitores Fofoqueiros",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1C1A16",
-  "theme_color": "#1C1A16",
   "orientation": "portrait",
+  "background_color": "#0f0720",
+  "theme_color": "#1a0a2e",
   "icons": [
     {
       "src": "icon-192.png",
